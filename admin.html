@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscribers — VCS Robotics Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <span>
+        <span class="brand-name">VCS Robotics</span>
+        <span class="brand-sub">Admin</span>
+      </span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="wrap">
+      <h1>Mailing list subscribers</h1>
+      <p class="muted">Teacher/lead access only. This page is unlisted — do not share the link publicly.</p>
+
+      <div class="card" id="loginCard">
+        <h2>Enter password</h2>
+        <label>Admin password</label>
+        <input type="password" id="admin-password" placeholder="••••••••">
+        <div class="error-msg" id="loginError"></div>
+        <button type="button" class="submit-btn" id="loginBtn">View subscribers →</button>
+      </div>
+
+      <div id="listWrap" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:20px 0;">
+          <div id="listSummary" class="muted"></div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-navy" id="refreshBtn">Refresh</button>
+            <button type="button" class="btn btn-gold" id="exportBtn">Download CSV</button>
+          </div>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table id="subTable">
+            <thead>
+              <tr>
+                <th>Name</th><th>Email</th><th>Status</th><th>Source</th><th>Subscribed</th><th>Unsubscribed</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>VCS Robotics · Admin</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
