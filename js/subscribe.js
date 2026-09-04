@@ -8,6 +8,8 @@
       <input type="text" id="sub-name" placeholder="Optional">
       <label>Email *</label>
       <input type="email" id="sub-email" required placeholder="you@example.com">
+      <label>Which updates would you like? *</label>
+      <div class="roles" id="subLists">${listOptionsHtml('sub-list')}</div>
       <div class="error-msg" id="subError"></div>
       <button type="button" class="submit-btn" id="subSubmitBtn">Subscribe →</button>
     `;
@@ -18,9 +20,18 @@
 
       const name = document.getElementById('sub-name').value.trim();
       const email = document.getElementById('sub-email').value.trim();
+      const lists = Array.from(
+        document.querySelectorAll('input[name="sub-list"]:checked')
+      ).map(cb => cb.value);
 
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (lists.length === 0) {
+        errorEl.textContent = 'Please choose at least one list.';
         errorEl.style.display = 'block';
         return;
       }
@@ -32,7 +43,7 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'subscribe', name, email, source: 'quick-subscribe' })
+          body: JSON.stringify({ action: 'subscribe', name, email, lists, source: 'quick-subscribe' })
         });
         const result = await res.json();
         if (result.status !== 'ok') throw new Error(result.message || 'Server error');

@@ -14,7 +14,7 @@ join.html            Mailing-list subscribe + full family/roster sign-up
 unsubscribe.html     Landing page for unsubscribe email links (?token=...)
 admin.html           Password-gated subscriber list + CSV export (unlisted, not in nav)
 css/style.css        Shared styles (navy #1b2a4a + gold/amber theme)
-js/config.js         SCRIPT_URL + shared constants (roles, grades, shirt sizes)
+js/config.js         SCRIPT_URL + shared constants (roles, grades, shirt sizes, mailing-list segments)
 js/subscribe.js      Quick mailing-list subscribe form logic
 js/family-form.js    Full family/roster sign-up form logic
 js/unsubscribe.js    Unsubscribe page logic
@@ -47,14 +47,16 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 
 - **Parent Submissions** — one row per child, from the full family sign-up form (pre-existing).
 - **Subscribers** — one row per mailing-list contact: name, email, unsubscribe token, status
-  (`subscribed` / `unsubscribed`), source, and timestamps. Created automatically on first subscribe.
+  (`subscribed` / `unsubscribed`), source, timestamps, and a `Lists` column (comma-separated segment
+  codes — see `LIST_OPTIONS` in [js/config.js](js/config.js): `elementary`, `middle`, `high`,
+  `lightweight`). Created automatically on first subscribe.
 
 ### Endpoints (all on the one deployed web app URL)
 
 | Action | Method | Params / body | What it does |
 |---|---|---|---|
-| Family sign-up (legacy, no `action` field) | POST | `{ parent, additionalContacts, children, subscribeToMailingList, submittedAt }` | Appends to Parent Submissions; optionally upserts a Subscriber row too |
-| Subscribe | POST | `{ action: 'subscribe', name, email, source }` | Upserts Subscriber row, generates/reuses a token, sends confirmation email with unsubscribe link |
+| Family sign-up (legacy, no `action` field) | POST | `{ parent, additionalContacts, children, subscribeToMailingList, mailingListLists, submittedAt }` | Appends to Parent Submissions; optionally upserts a Subscriber row too |
+| Subscribe | POST | `{ action: 'subscribe', name, email, lists, source }` | Upserts Subscriber row, generates/reuses a token, sends confirmation email with unsubscribe link |
 | Unsubscribe | GET | `?action=unsubscribe&token=...` | Marks the matching Subscriber row `unsubscribed` |
 | Admin list | GET | `?action=list&password=...` | Returns all Subscriber rows as JSON if password matches `ADMIN_PASSWORD` |
 
@@ -76,3 +78,10 @@ npx serve .
 ## GitHub Pages setup
 
 Repo Settings → Pages → Source: Deploy from branch → `main` / `/ (root)`.
+
+## Resources
+
+- **Join-page QR code ("Control Freaks Scan Card")** — printable QR linking to `join.html`,
+  navy/gold themed, with a print-flyer button:
+  https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858
+- **Backlog** — see [TODO.md](TODO.md) for planned form/mailing-list changes.
