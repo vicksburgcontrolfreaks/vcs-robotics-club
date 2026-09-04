@@ -99,11 +99,21 @@
             <input type="checkbox" id="subscribeCheck" style="width:auto;" checked>
             Also subscribe this email to the club mailing list
           </label>
+          <div id="familyListsWrap" style="margin-top:14px;">
+            <label>Which updates would you like? *</label>
+            <div class="roles" id="familyLists">${listOptionsHtml('family-list')}</div>
+          </div>
         </div>
         <div class="error-msg" id="formError"></div>
         <button type="submit" class="submit-btn" id="submitBtn">Submit →</button>
       </form>
     `;
+
+    const subscribeCheck = document.getElementById('subscribeCheck');
+    const familyListsWrap = document.getElementById('familyListsWrap');
+    subscribeCheck.addEventListener('change', () => {
+      familyListsWrap.style.display = subscribeCheck.checked ? 'block' : 'none';
+    });
 
     const extraContactsContainer = document.getElementById('extraContactsContainer');
     contactCount = 0;
@@ -128,7 +138,10 @@
       const last = document.getElementById('p-last').value.trim();
       const email = document.getElementById('p-email').value.trim();
       const phone = document.getElementById('p-phone').value.trim();
-      const subscribeToMailingList = document.getElementById('subscribeCheck').checked;
+      const subscribeToMailingList = subscribeCheck.checked;
+      const mailingListLists = Array.from(
+        document.querySelectorAll('input[name="family-list"]:checked')
+      ).map(cb => cb.value);
 
       const additionalContacts = Array.from(
         extraContactsContainer.querySelectorAll('.contact-block')
@@ -142,6 +155,7 @@
       const childBlocks = Array.from(container.querySelectorAll('.child-block'));
       const children = [];
       let valid = first && last && email && phone && childBlocks.length > 0;
+      if (subscribeToMailingList && mailingListLists.length === 0) valid = false;
 
       for (const block of childBlocks) {
         const name = block.querySelector('.child-name').value.trim();
@@ -153,7 +167,9 @@
       }
 
       if (!valid) {
-        errorEl.textContent = 'Please fill in all required fields (marked with *).';
+        errorEl.textContent = subscribeToMailingList && mailingListLists.length === 0
+          ? 'Please choose at least one mailing list, or uncheck the subscribe box.'
+          : 'Please fill in all required fields (marked with *).';
         errorEl.style.display = 'block';
         return;
       }
@@ -170,6 +186,7 @@
             additionalContacts,
             children,
             subscribeToMailingList,
+            mailingListLists: subscribeToMailingList ? mailingListLists : [],
             submittedAt: new Date().toISOString()
           })
         });

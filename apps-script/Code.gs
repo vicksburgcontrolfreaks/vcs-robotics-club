@@ -15,7 +15,7 @@
 
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
-const BACKEND_VERSION = '2.0.0';
+const BACKEND_VERSION = '2.1.0';
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 const CLUB_NAME = 'VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)';
 
@@ -88,7 +88,8 @@ function handleFamilySignup(data) {
   // Combined join flow: family form also offers a mailing-list opt-in checkbox.
   if (data.subscribeToMailingList && parent.email) {
     const name = [parent.firstName, parent.lastName].filter(Boolean).join(' ');
-    upsertSubscriber(name, parent.email, 'family-form', true);
+    const lists = Array.isArray(data.mailingListLists) ? data.mailingListLists.filter(Boolean) : [];
+    upsertSubscriber(name, parent.email, 'family-form', true, lists);
   }
 
   return jsonOut({ status: 'ok' });
@@ -121,17 +122,25 @@ function handleSubscribe(data) {
     throw new Error('A valid email address is required.');
   }
 
-  const result = upsertSubscriber(name, email, data.source || 'quick-subscribe', true);
+  const lists = Array.isArray(data.lists) ? data.lists.filter(Boolean) : [];
+  if (lists.length === 0) {
+    throw new Error('Please choose at least one list.');
+  }
+
+  const result = upsertSubscriber(name, email, data.source || 'quick-subscribe', true, lists);
   sendConfirmationEmail(name, email, result.token);
   return jsonOut({ status: 'ok' });
 }
 
 // Adds a new subscriber row, or reactivates/updates an existing one by email.
+// `lists` is an array of segment codes (see LIST_OPTIONS in js/config.js) —
+// always overwritten with the latest submission, same as name.
 // Returns { token, isNew }.
-function upsertSubscriber(name, email, source, sendEmailOnCreate) {
+function upsertSubscriber(name, email, source, sendEmailOnCreate, lists) {
   const sheet = getOrCreateSubscribersSheet();
   const values = sheet.getDataRange().getValues();
   const now = new Date().toISOString();
+  const listsStr = (lists || []).join(', ');
 
   for (let i = 1; i < values.length; i++) {
     const rowEmail = String(values[i][2] || '').trim().toLowerCase();
@@ -143,12 +152,13 @@ function upsertSubscriber(name, email, source, sendEmailOnCreate) {
       sheet.getRange(rowNum, 5).setValue('subscribed');
       sheet.getRange(rowNum, 7).setValue(now);         // subscribed at (re-subscribed)
       sheet.getRange(rowNum, 8).setValue('');           // clear unsubscribed at
+      sheet.getRange(rowNum, 9).setValue(listsStr);
       return { token: token, isNew: false };
     }
   }
 
   const token = Utilities.getUuid();
-  sheet.appendRow([now, name, email, token, 'subscribed', source || '', now, '']);
+  sheet.appendRow([now, name, email, token, 'subscribed', source || '', now, '', listsStr]);
   return { token: token, isNew: true };
 }
 
@@ -158,11 +168,12 @@ function getOrCreateSubscribersSheet() {
   if (!sheet) {
     sheet = ss.insertSheet(SUBSCRIBERS_SHEET);
     sheet.appendRow([
-      'Created At', 'Name', 'Email', 'Token', 'Status', 'Source', 'Subscribed At', 'Unsubscribed At'
+      'Created At', 'Name', 'Email', 'Token', 'Status', 'Source', 'Subscribed At', 'Unsubscribed At', 'Lists'
     ]);
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(3, 220); // email
     sheet.setColumnWidth(4, 260); // token
+    sheet.setColumnWidth(9, 200); // lists
   }
   return sheet;
 }
@@ -225,7 +236,8 @@ function handleList(params) {
       status: values[i][4],
       source: values[i][5],
       subscribedAt: values[i][6],
-      unsubscribedAt: values[i][7]
+      unsubscribedAt: values[i][7],
+      lists: values[i][8] || ''
     });
   }
   return jsonOut({ status: 'ok', subscribers: rows });

@@ -37,7 +37,8 @@
       <div id="listWrap" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:20px 0;">
           <div id="listSummary" class="muted"></div>
-          <div style="display:flex; gap:10px;">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <select id="listFilter"><option value="">All lists</option></select>
             <button type="button" class="btn btn-navy" id="refreshBtn">Refresh</button>
             <button type="button" class="btn btn-gold" id="exportBtn">Download CSV</button>
           </div>
@@ -46,7 +47,7 @@
           <table id="subTable">
             <thead>
               <tr>
-                <th>Name</th><th>Email</th><th>Status</th><th>Source</th><th>Subscribed</th><th>Unsubscribed</th>
+                <th>Name</th><th>Email</th><th>Status</th><th>Lists</th><th>Source</th><th>Subscribed</th><th>Unsubscribed</th>
               </tr>
             </thead>
             <tbody></tbody>
