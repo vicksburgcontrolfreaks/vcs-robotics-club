@@ -37,6 +37,21 @@
     return currentRows.filter(r => listCodes(r).includes(filter));
   }
 
+  // Subscribed-only emails for the current list filter — this is the set
+  // that's actually safe to mail (unsubscribed rows can linger in a list's
+  // filter match since unsubscribing doesn't clear the Lists column).
+  function subscribedEmails() {
+    return getFilteredRows()
+      .filter(r => r.status === 'subscribed')
+      .map(r => (r.email || '').trim())
+      .filter(Boolean);
+  }
+
+  function currentFilterLabel() {
+    const val = listFilterEl.value;
+    return val ? (LIST_LABELS[val] || val) : 'All Subscribers';
+  }
+
   async function fetchSubscribers(password) {
     const url = SCRIPT_URL + '?action=list&password=' + encodeURIComponent(password);
     const res = await fetch(url);
@@ -125,5 +140,48 @@
 
   document.getElementById('exportBtn').addEventListener('click', () => {
     downloadCsv(getFilteredRows());
+  });
+
+  // A mailto: URL that's too long gets silently truncated by some mail
+  // clients/OSes — rather than risk a Bcc list quietly losing names, refuse
+  // past a safe length and point to the copy-to-clipboard fallback instead.
+  const MAILTO_SAFE_LENGTH = 1800;
+
+  document.getElementById('composeBtn').addEventListener('click', () => {
+    const emails = subscribedEmails();
+    if (emails.length === 0) {
+      alert('No subscribed emails match the current filter.');
+      return;
+    }
+    const subject = encodeURIComponent('VCS Robotics — ' + currentFilterLabel() + ' update');
+    const bcc = encodeURIComponent(emails.join(','));
+    const mailto = 'mailto:?bcc=' + bcc + '&subject=' + subject;
+
+    if (mailto.length > MAILTO_SAFE_LENGTH) {
+      alert(
+        'This list (' + emails.length + ' emails) is too long for a mailto link to carry reliably.\n\n' +
+        'Use "Copy Bcc list" instead, then paste into Gmail\'s Bcc field.'
+      );
+      return;
+    }
+    window.location.href = mailto;
+  });
+
+  document.getElementById('copyBccBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('copyBccBtn');
+    const emails = subscribedEmails();
+    if (emails.length === 0) {
+      alert('No subscribed emails match the current filter.');
+      return;
+    }
+    const text = emails.join(', ');
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied ' + emails.length + ' emails ✓';
+    } catch (err) {
+      window.prompt('Copy these emails manually (Ctrl/Cmd+C, then Enter):', text);
+    } finally {
+      setTimeout(() => { btn.textContent = 'Copy Bcc list'; }, 2500);
+    }
   });
 })();

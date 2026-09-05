@@ -29,12 +29,26 @@ Nothing here is implemented yet — this is planning only.
 - [x] **Admin view: show + filter by segment.** [admin.html](admin.html) / [js/admin.js](js/admin.js)
       — table now has a Lists column, plus a segment filter dropdown that scopes both the on-screen
       list and the CSV export/filename.
-- [ ] **Redeploy required.** This changed `apps-script/Code.gs` — follow the [Backend](#backend-google-apps-script)
-      steps above (paste updated script in, **Deploy → Manage deployments → New version → Deploy**)
-      before these changes take effect live. No new Script Properties needed.
+- [x] **Redeploy required.** Done — `apps-script/Code.gs` v2.1.0 redeployed live.
 - [ ] **Existing subscriber rows** have a blank `Lists` cell (they predate segmentation) — worth a
       one-time pass to ask existing subscribers what they want, or just default them to "all teams"
       manually in the sheet.
+
+## New site pages
+
+- [ ] **Dedicated sponsor page.** The [join.html](join.html) card is just a CTA button; a full page
+      could cover sponsorship tiers/benefits, a thank-you list of current sponsors (logos), and the
+      RevTrak link — decide whether the join.html card stays as its own quick CTA or links through
+      to this page instead.
+- [ ] **Per-club pages: Elementary, Middle School, High School.** Three separate pages, each with
+      that team's own info (meeting times/location, coaches or leads, roster, season updates
+      specific to that level). Ties into the mailing-list segmentation already built — each page
+      could deep-link to join.html with that team's checkbox pre-selected. Site nav will need to
+      grow to fit three more pages (dropdown vs. three new top-level links — decide when starting).
+- [ ] **Class pages: AER (Applied Engineering and Robotics) and DBL (Design and Build Lab).** Two
+      more pages, one per class — distinct from the three club-team pages above (these are CTE
+      classes, not the extracurricular club). Will likely pull content from the CTE repo's `8AER`,
+      `HSAER`, and `Design and Build Lab` folders — design/layout still to be worked out later.
 
 ## Season update page
 

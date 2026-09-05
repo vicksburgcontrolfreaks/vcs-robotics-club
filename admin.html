@@ -40,9 +40,14 @@
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <select id="listFilter"><option value="">All lists</option></select>
             <button type="button" class="btn btn-navy" id="refreshBtn">Refresh</button>
+            <button type="button" class="btn btn-navy" id="copyBccBtn">Copy Bcc list</button>
+            <button type="button" class="btn btn-gold" id="composeBtn">Compose email →</button>
             <button type="button" class="btn btn-gold" id="exportBtn">Download CSV</button>
           </div>
         </div>
+        <p class="muted" id="composeHint" style="font-size:12.5px; margin:-6px 0 16px;">
+          Both buttons use only <strong>subscribed</strong> emails matching the list filter above.
+        </p>
         <div class="card" style="overflow-x:auto;">
           <table id="subTable">
             <thead>
