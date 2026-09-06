@@ -1,17 +1,16 @@
-/* VCS Robotics Club — shared site styles
-   Palette matches the CTE parent sign-up form (navy + gold/amber). */
+/* Vicksburg Robotics — shared site styles
+   Palette from the Control Freaks logo: red + white primary, black + grey secondary. */
 
 :root {
-  --navy: #1b2a4a;
-  --navy-light: #2c4270;
-  --navy-dark: #101a30;
-  --gold: #f5a623;
-  --gold-dark: #c9861b;
-  --bg: #f5f3ee;
+  --red: #d0202a;
+  --red-dark: #a3181f;
+  --black: #1a1a1a;
+  --black-light: #333333;
+  --bg: #f2f2f2;
   --card: #ffffff;
-  --text: #22262f;
-  --muted: #6b7280;
-  --border: #e2e0d8;
+  --text: #1f1f1f;
+  --muted: #6b6b6b;
+  --border: #dcdcdc;
   --danger: #b3261e;
   --success: #1e7a3d;
 }
@@ -30,14 +29,14 @@ body {
   line-height: 1.5;
 }
 
-a { color: var(--navy-light); }
-a:hover { color: var(--navy); }
+a { color: var(--red); }
+a:hover { color: var(--red-dark); }
 
 img { max-width: 100%; display: block; }
 
 /* ── Site header / nav ─────────────────────────────────────── */
 .site-header {
-  background: var(--navy);
+  background: var(--black);
   color: #fff;
 }
 
@@ -55,22 +54,24 @@ img { max-width: 100%; display: block; }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   color: #fff;
 }
 
+.brand .brand-logo { width: 44px; height: 44px; }
+
 .brand .brand-name {
   font-weight: bold;
-  font-size: 17px;
+  font-size: 20px;
   letter-spacing: 0.2px;
 }
 
 .brand .brand-sub {
   display: block;
-  font-size: 11px;
-  color: var(--gold);
-  font-weight: normal;
+  font-size: 14px;
+  color: var(--red);
+  font-weight: bold;
   letter-spacing: 0.3px;
 }
 
@@ -81,7 +82,7 @@ img { max-width: 100%; display: block; }
 }
 
 .site-nav a {
-  color: #dfe4ee;
+  color: #e2e2e2;
   text-decoration: none;
   font-size: 14px;
   font-weight: bold;
@@ -89,8 +90,8 @@ img { max-width: 100%; display: block; }
   border-radius: 6px;
 }
 
-.site-nav a:hover { background: var(--navy-light); color: #fff; }
-.site-nav a.active { background: var(--gold); color: var(--navy-dark); }
+.site-nav a:hover { background: var(--black-light); color: #fff; }
+.site-nav a.active { background: var(--red); color: #fff; }
 
 /* ── Layout helpers ────────────────────────────────────────── */
 .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
@@ -103,7 +104,7 @@ main { padding: 40px 0 60px; }
 .section-alt { background: #fff; }
 
 .eyebrow {
-  color: var(--gold-dark);
+  color: var(--red-dark);
   font-size: 13px;
   font-weight: bold;
   text-transform: uppercase;
@@ -111,7 +112,7 @@ main { padding: 40px 0 60px; }
   margin: 0 0 8px;
 }
 
-h1, h2, h3 { color: var(--navy); margin: 0 0 12px; }
+h1, h2, h3 { color: var(--black); margin: 0 0 12px; }
 h1 { font-size: 32px; }
 h2 { font-size: 24px; }
 h3 { font-size: 17px; }
@@ -120,15 +121,15 @@ p { margin: 0 0 14px; color: var(--text); }
 
 /* ── Hero ──────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+  background: linear-gradient(135deg, var(--black) 0%, #000000 100%);
   color: #fff;
   padding: 64px 0;
   text-align: center;
 }
 
-.hero .eyebrow { color: var(--gold); }
+.hero .eyebrow { color: var(--red); }
 .hero h1 { color: #fff; font-size: clamp(28px, 5vw, 44px); margin-bottom: 14px; }
-.hero p.lead { color: #cfd6e4; font-size: 17px; max-width: 620px; margin: 0 auto 28px; }
+.hero p.lead { color: #d8d8d8; font-size: 17px; max-width: 620px; margin: 0 auto 28px; }
 
 .btn {
   display: inline-block;
@@ -141,12 +142,15 @@ p { margin: 0 0 14px; color: var(--text); }
   border: none;
 }
 
-.btn-gold { background: var(--gold); color: var(--navy-dark); }
-.btn-gold:hover { background: var(--gold-dark); color: var(--navy-dark); }
+/* Class names are historical (from the old navy/gold palette) — .btn-gold is
+   the red accent button, .btn-navy is the black one. Left unrenamed since
+   every page references these class names directly. */
+.btn-gold { background: var(--red); color: #fff; }
+.btn-gold:hover { background: var(--red-dark); color: #fff; }
 .btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.6); }
 .btn-outline:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.btn-navy { background: var(--navy); color: #fff; }
-.btn-navy:hover { background: var(--navy-light); color: #fff; }
+.btn-navy { background: var(--black); color: #fff; }
+.btn-navy:hover { background: var(--black-light); color: #fff; }
 
 .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
@@ -165,14 +169,14 @@ p { margin: 0 0 14px; color: var(--text); }
 }
 
 .card-link { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-.card-link:hover { border-color: var(--navy-light); box-shadow: 0 2px 8px rgba(27,42,74,0.08); }
+.card-link:hover { border-color: var(--red); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 @media (prefers-reduced-motion: reduce) { .card-link { transition: none; } }
 
 .card h2, .card h3 {
   font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  color: var(--navy);
+  color: var(--black);
   margin: 0 0 10px;
 }
 
@@ -180,7 +184,7 @@ p { margin: 0 0 14px; color: var(--text); }
   text-align: center;
   padding: 18px 10px;
 }
-.stat .num { font-size: 30px; font-weight: bold; color: var(--navy); }
+.stat .num { font-size: 30px; font-weight: bold; color: var(--black); }
 .stat .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
 
 .roles-grid, .team-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
@@ -206,7 +210,7 @@ input[type=text], input[type=email], input[type=tel], input[type=password], sele
 
 textarea { resize: vertical; }
 
-input:focus, select:focus, textarea:focus { outline: 2px solid var(--navy-light); outline-offset: 1px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--red); outline-offset: 1px; }
 
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
@@ -220,7 +224,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--navy-light)
   position: relative;
 }
 
-.child-title { font-size: 13px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
+.child-title { font-size: 13px; font-weight: bold; color: var(--black); margin-bottom: 4px; }
 
 .remove-child {
   position: absolute; top: 12px; right: 12px;
@@ -241,15 +245,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--navy-light)
   width: 100%; padding: 13px; border-radius: 8px;
   font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; border: none;
 }
-.add-child-btn { background: #fff; border: 1.5px dashed var(--navy-light); color: var(--navy-light); }
-.submit-btn { background: var(--navy); color: #fff; }
+.add-child-btn { background: #fff; border: 1.5px dashed var(--red); color: var(--red); }
+.submit-btn { background: var(--black); color: #fff; }
 .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .error-msg { color: var(--danger); font-size: 13px; margin-top: 8px; display: none; }
-.info-msg { color: var(--navy); font-size: 13px; margin-top: 8px; display: none; }
+.info-msg { color: var(--black); font-size: 13px; margin-top: 8px; display: none; }
 
 .confirm-screen { text-align: center; padding: 40px 20px; }
-.confirm-screen h2 { color: var(--navy); font-size: 22px; }
+.confirm-screen h2 { color: var(--black); font-size: 22px; }
 .confirm-screen p { color: var(--muted); }
 .confirm-screen .checkmark { font-size: 56px; display: block; margin-bottom: 16px; }
 .confirm-screen button, .confirm-screen a.btn {
@@ -258,19 +262,19 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--navy-light)
 
 /* ── Footer ────────────────────────────────────────────────── */
 .site-footer {
-  background: var(--navy-dark);
-  color: #b9c1d1;
+  background: var(--black);
+  color: #c2c2c2;
   padding: 28px 0;
   font-size: 13px;
   text-align: center;
 }
-.site-footer a { color: #dfe4ee; }
-.site-footer p { color: #b9c1d1; margin: 4px 0; }
+.site-footer a { color: #e2e2e2; }
+.site-footer p { color: #c2c2c2; margin: 4px 0; }
 
 /* ── Misc ──────────────────────────────────────────────────── */
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 table th, table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
-table th { color: var(--navy); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+table th { color: var(--black); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
 
 .badge {
   display: inline-block; padding: 2px 8px; border-radius: 999px;
@@ -286,7 +290,7 @@ table th { color: var(--navy); font-size: 12px; text-transform: uppercase; lette
   text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
 }
 .comm-day {
-  font-weight: bold; color: var(--navy); font-size: 15px;
+  font-weight: bold; color: var(--black); font-size: 15px;
   margin: 20px 0 8px; padding-top: 12px; border-top: 1px solid var(--border);
 }
 .comm-card .comm-day:first-of-type { margin-top: 6px; padding-top: 0; border-top: none; }
@@ -295,12 +299,12 @@ table th { color: var(--navy); font-size: 12px; text-transform: uppercase; lette
   padding: 12px 14px; margin-bottom: 10px;
 }
 .comm-event-time { font-weight: bold; font-size: 13px; color: var(--text); }
-.comm-event-title { color: var(--navy); font-weight: bold; margin: 2px 0 4px; }
+.comm-event-title { color: var(--black); font-weight: bold; margin: 2px 0 4px; }
 .comm-event p { margin: 0; font-size: 13.5px; color: var(--muted); }
-.comm-highlight { background: #fff8e6; border-left-color: var(--gold); }
+.comm-highlight { background: #fdecec; border-left-color: var(--red); }
 .comm-alert {
-  background: #fff8e6; border: 1.5px solid var(--gold); border-radius: 8px;
+  background: #fdecec; border: 1.5px solid var(--red); border-radius: 8px;
   padding: 14px 16px; margin: 18px 0;
 }
-.comm-alert-title { font-weight: bold; color: var(--gold-dark); margin-bottom: 6px; }
+.comm-alert-title { font-weight: bold; color: var(--red-dark); margin-bottom: 6px; }
 .comm-alert p { margin: 0; font-size: 13.5px; color: var(--text); }

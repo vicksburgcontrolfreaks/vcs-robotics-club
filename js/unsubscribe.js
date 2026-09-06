@@ -24,7 +24,7 @@
     const res = await fetch(url);
     const result = await res.json();
     if (result.status === 'ok') {
-      renderResult(true, "You've been removed from the VCS Robotics mailing list. Sorry to see you go!");
+      renderResult(true, "You've been removed from the Vicksburg Robotics mailing list. Sorry to see you go!");
     } else {
       renderResult(false, result.message || 'That link is invalid or has already been used.');
     }
