@@ -22,7 +22,7 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.6.0';
+const BACKEND_VERSION = '2.7.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
@@ -343,6 +343,9 @@ function handleUpdateCommunication(data) {
         }
         sheet.getRange(rowNum, 8).setValue(data.audience);
       }
+      if (data.announcedAt !== undefined) {
+        sheet.getRange(rowNum, 9).setValue(data.announcedAt);
+      }
       return jsonOut({ status: 'ok' });
     }
   }
@@ -410,6 +413,7 @@ function handlePolishCommunication(data) {
 
   const title = (data.title || '').trim();
   const body = (data.body || '').trim();
+  const instructions = (data.instructions || '').trim();
   if (!title || !body) {
     return jsonOut({ status: 'error', message: 'Title and body are required before polishing.' });
   }
@@ -432,12 +436,21 @@ function handlePolishCommunication(data) {
     'rather than for the reader — e.g. "I also want to share the QR code for X" or "add a link here."',
     'Never include such a sentence verbatim in the output. Instead:',
     '  - If it asks to share/include the mailing-list sign-up QR code or link, insert exactly this',
-    '    placeholder on its own line: [[QR_JOIN]]',
-    '  - If it asks to share/include the Discord invite/QR code, insert exactly this placeholder on',
-    '    its own line: [[QR_DISCORD]]',
+    '    placeholder on its own line — nothing wrapped around it, it already renders as a complete,',
+    '    styled block: [[QR_JOIN]]',
+    '  - If it asks to share/include the Discord invite/QR code, insert exactly this placeholder the',
+    '    same way: [[QR_DISCORD]]',
+    '  - If asked for both QR codes placed side by side, wrap the two placeholders (only the',
+    '    placeholders — nothing else) in one row like this:',
+    '    <div class="comm-qr-row">[[QR_JOIN]][[QR_DISCORD]]</div>',
+    '  - Never invent your own QR markup, and never use a placeholder more than once each.',
     '  - For any other meta-instruction you cannot confidently resolve, leave it out of the body',
     '    entirely and describe what\'s needed in the "notes" field instead — never invent a link,',
     '    date, or fact to satisfy it.',
+    '',
+    'If an "Additional instructions for this revision" section is given below, follow it — it may',
+    'ask for layout changes (like the QR row above), tone adjustments, or content changes. The same',
+    'placeholder rule still applies: never draw a QR code yourself, only place the placeholders.',
     '',
     'Also fix grammar/typos and tighten the wording — warm but professional, matching a school',
     'robotics program\'s voice. Preserve every concrete fact (dates, times, locations, names, links)',
@@ -450,13 +463,18 @@ function handlePolishCommunication(data) {
     '{"body": "<html>", "summary": "line1\\nline2\\n...", "notes": "anything needing human attention, or empty string"}'
   ].join('\n');
 
+  let userContent = 'Title: ' + title + '\n\nDraft body:\n' + body;
+  if (instructions) {
+    userContent += '\n\nAdditional instructions for this revision:\n' + instructions;
+  }
+
   const payload = {
     model: CLAUDE_MODEL,
     max_tokens: 4096,
     output_config: { effort: 'medium' },
     system: systemPrompt,
     messages: [
-      { role: 'user', content: 'Title: ' + title + '\n\nDraft body:\n' + body }
+      { role: 'user', content: userContent }
     ]
   };
 
@@ -553,7 +571,8 @@ function handleCommunicationsAdmin(params) {
       summary: values[i][4],
       status: values[i][5],
       publishedAt: values[i][6],
-      audience: values[i][7] || ''
+      audience: values[i][7] || '',
+      announcedAt: values[i][8] || ''
     });
   }
   rows.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
@@ -566,13 +585,14 @@ function getOrCreateCommunicationsSheet() {
   if (!sheet) {
     sheet = ss.insertSheet(COMMUNICATIONS_SHEET);
     sheet.appendRow([
-      'ID', 'Created At', 'Title', 'Body', 'Summary', 'Status', 'Published At', 'Audience'
+      'ID', 'Created At', 'Title', 'Body', 'Summary', 'Status', 'Published At', 'Audience', 'Announced At'
     ]);
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(1, 220); // id
     sheet.setColumnWidth(4, 400); // body
     sheet.setColumnWidth(5, 300); // summary
     sheet.setColumnWidth(8, 120); // audience
+    sheet.setColumnWidth(9, 160); // announced at
   }
   return sheet;
 }

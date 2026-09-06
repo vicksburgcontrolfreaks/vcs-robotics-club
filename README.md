@@ -65,9 +65,11 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
   codes — see `LIST_OPTIONS` in [js/config.js](js/config.js): `elementary`, `middle`, `high`,
   `lightweight`). Created automatically on first subscribe.
 - **Communications** — team update posts: ID, timestamps, title, body (HTML), a plain-text summary
-  (used for the announcement email), status (`draft` / `published`), and an `Audience` column — one
+  (used for the announcement email), status (`draft` / `published`), an `Audience` column — one
   of `elementary` / `middle` / `high` / `lightweight` (same codes as `Lists` above; `lightweight` =
-  Sponsors). Drafts are written from admin.html; review, edit, optional AI polish, and publish all
+  Sponsors) — and an `Announced At` timestamp, set when the admin clicks "Mark as announced" on a
+  published post (purely bookkeeping — doesn't unpublish or touch the live page either way).
+  Drafts are written from admin.html; review, edit, optional AI polish, and publish all
   happen there (in-browser, no Claude Code session needed) — publishing is what makes a post appear
   on that program's `updates-<program>.html` page.
 - **AI polish + QR placeholders.** The "✨ Polish with AI" button sends a draft's raw title/body to
@@ -86,9 +88,9 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Unsubscribe | GET | `?action=unsubscribe&token=...` | Marks the matching Subscriber row `unsubscribed` |
 | Admin list | GET | `?action=list&password=...` | Returns all Subscriber rows as JSON if password matches `ADMIN_PASSWORD` |
 | Post communication | POST | `{ action: 'postCommunication', password, title, body, audience }` | Appends a Communications row with status `draft`; `audience` must be one of `COMM_AUDIENCE_CODES` |
-| Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow |
+| Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience?, announcedAt? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow and by "Mark as announced" (sets `announcedAt`) |
 | Delete communication | POST | `{ action: 'deleteCommunication', password, id }` | Removes a Communications row entirely — for stale/duplicate drafts |
-| Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
+| Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience, instructions? }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent, optionally following a free-form `instructions` note (e.g. "add the Discord QR too, side by side") — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
 | Published communications | GET | `?action=publishedCommunications&audience=<code>` | Public, no password — only `published` rows, newest first, optionally scoped to one program. Powers each updates-<program>.html |
 | Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published, every program), for admin.html's review lists |
 | Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |

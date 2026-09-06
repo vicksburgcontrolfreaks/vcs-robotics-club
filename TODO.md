@@ -117,6 +117,18 @@ with an email loop attached.
       "share this link to our Discord" as a plain link rather than converting it to a QR too (a
       distinction it drew on its own, not something explicitly spelled out), and produced a clean
       announcement-email summary. Fully working.
+- [x] **"Instructions for AI" field.** A separate optional textarea in the review panel — a note to
+      Claude (not part of the post itself), e.g. "add a QR code for the Discord link too, side by
+      side with the mailing-list one." Sent as `instructions` to `polishCommunication`; the system
+      prompt now supports a `.comm-qr-row` wrapper for placing both QR placeholders side by side
+      (each still renders with its own "Scan or click here to join…" caption — that's baked into the
+      pre-generated `JOIN_QR_SVG_BLOCK`/`DISCORD_QR_SVG_BLOCK`, unaffected by row vs. stacked layout).
+- [x] **"Mark as announced" for published posts.** Answers "how do these tiles go away" — they
+      don't disappear (the post stays live either way), but a published item shows either
+      **Compose announcement + Mark as announced**, or — once marked — a calm "✓ Announced `<date>`"
+      badge in place of both buttons. New `Announced At` column (Communications sheet, appended at
+      the end) set via the existing `updateCommunication` action (`announcedAt` field) — no new
+      backend action needed. Bumped to v2.7.0.
 
 ## Umbrella-program rebrand ✅ built — needs redeploy
 
