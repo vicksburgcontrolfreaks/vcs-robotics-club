@@ -87,6 +87,26 @@ with an email loop attached.
 - [ ] **Quarterly lightweight digest** still needs its own thing — a periodic rollup of recent
       communications across all programs, sent only to Sponsors (`lightweight`) subscribers.
 
+## Admin portal polish ✅ built
+
+- [x] **Renamed the entry point.** admin.html's h1 "Mailing list subscribers" → "Admin Portal";
+      login button "View subscribers →" → "Enter Portal →" (default label in admin.html, reset
+      label in js/admin.js) — the page covers far more than subscribers now.
+- [x] **Public scan-card.html.** Real, on-site, publicly-viewable QR flyer (mailing list + Discord
+      invite side by side), with a Print flyer button. Replaces admin.html's old "Scan card" quick
+      link, which pointed at the private Claude artifact — that link was never actually reachable by
+      site visitors. The admin quick link now points here instead.
+- [x] **`.comm-qr` embed pattern.** [css/style.css](css/style.css) — a reusable style for embedding
+      a self-hosted, clickable QR code directly inside a communication post (used in the
+      "Informational Meeting" draft to replace a meta-instruction sentence about sharing a QR code
+      with an actual one, linking to join.html).
+- [ ] **AI-assisted draft polish — scoping, not built.** Asked for: a means in admin.html to have an
+      LLM proofread/interpret a draft (fix mistakes, professional tone, catch meta-instructions like
+      "share the QR code here" and actually fulfill them) before publish. Real design decision before
+      building: this needs a live LLM API call from `Code.gs` (`UrlFetchApp` to the Anthropic API),
+      which means an Anthropic API key stored as a Script Property — a new credential to obtain and
+      pay for, separate from `ADMIN_PASSWORD`. Not started; asked the user how they want to scope it.
+
 ## Umbrella-program rebrand ✅ built — needs redeploy
 
 Resolves the branding question flagged above: site-wide chrome (header brand name/logo, footer,
