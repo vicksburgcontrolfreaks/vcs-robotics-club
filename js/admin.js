@@ -168,7 +168,7 @@
       errorEl.style.display = 'block';
     } finally {
       btn.disabled = false;
-      btn.textContent = 'View subscribers →';
+      btn.textContent = 'Enter Portal →';
     }
   }
 
