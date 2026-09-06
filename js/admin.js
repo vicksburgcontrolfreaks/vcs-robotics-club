@@ -255,7 +255,7 @@
     }
   }
 
-  function composeAnnouncement(comm) {
+  async function composeAnnouncement(comm, btn) {
     const audience = COMM_AUDIENCE_BY_CODE[comm.audience];
     const emails = emailsForAudience(comm.audience);
     if (emails.length === 0) {
@@ -272,19 +272,17 @@
       .join('\n');
     const subject = 'Vicksburg Robotics — ' + comm.title;
 
-    const mailto = 'mailto:?bcc=' + encodeURIComponent(emails.join(','))
-      + '&subject=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(body);
+    const announcementText = 'Bcc: ' + emails.join(', ') + '\nSubject: ' + subject + '\n\n' + body;
+    const originalLabel = btn.textContent;
 
-    if (mailto.length > MAILTO_SAFE_LENGTH) {
-      window.prompt(
-        'This composed email is too long for a mailto link. Use "Copy Bcc list" for the ' +
-        'recipients, then paste this body text into Gmail yourself:',
-        body
-      );
-      return;
+    try {
+      await navigator.clipboard.writeText(announcementText);
+      btn.textContent = 'Announcement copied to clipboard';
+    } catch (err) {
+      window.prompt('Copy this announcement manually (Ctrl/Cmd+C, then Enter):', announcementText);
+    } finally {
+      setTimeout(() => { btn.textContent = originalLabel; }, 2500);
     }
-    triggerMailto(mailto, emails, subject, body);
   }
 
   function renderCommunications() {
@@ -326,7 +324,7 @@
     publishedEl.querySelectorAll('button[data-comm-id]').forEach(btn => {
       btn.addEventListener('click', () => {
         const comm = published.find(c => c.id === btn.getAttribute('data-comm-id'));
-        if (comm) composeAnnouncement(comm);
+        if (comm) composeAnnouncement(comm, btn);
       });
     });
   }
