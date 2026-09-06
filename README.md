@@ -45,8 +45,11 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 1. Open the existing Apps Script project (linked to the same Google Sheet used by
    `parent_form.html`'s `Parent Submissions` sheet).
 2. Replace its script content with [`apps-script/Code.gs`](apps-script/Code.gs) from this repo.
-3. **Project Settings → Script Properties** → add a property:
+3. **Project Settings → Script Properties** → add:
    - `ADMIN_PASSWORD` = a password only you and other club leads know (used by `admin.html`).
+   - `ANTHROPIC_API_KEY` = an Anthropic API key (optional — powers the "✨ Polish with AI" button in
+     the draft review panel; everything else works fine without it, the button just shows a clear
+     error instead).
 4. Confirm the `SITE_URL` constant at the top of `Code.gs` matches this site's GitHub Pages URL.
 5. **Deploy → Manage deployments** → edit the existing deployment → set a new version → Deploy.
    This keeps the same `/exec` URL already in use — no need to update `SCRIPT_URL` anywhere.
@@ -64,9 +67,15 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 - **Communications** — team update posts: ID, timestamps, title, body (HTML), a plain-text summary
   (used for the announcement email), status (`draft` / `published`), and an `Audience` column — one
   of `elementary` / `middle` / `high` / `lightweight` (same codes as `Lists` above; `lightweight` =
-  Sponsors). Drafts are written from admin.html; review, edit, and publish also happen there
-  (in-browser, no Claude round-trip needed) — publishing is what makes a post appear on that
-  program's `updates-<program>.html` page.
+  Sponsors). Drafts are written from admin.html; review, edit, optional AI polish, and publish all
+  happen there (in-browser, no Claude Code session needed) — publishing is what makes a post appear
+  on that program's `updates-<program>.html` page.
+- **AI polish + QR placeholders.** The "✨ Polish with AI" button sends a draft's raw title/body to
+  Claude to copyedit and catch meta-instructions written to the editor rather than the reader (e.g.
+  "share the QR code here"). Rather than have the model reproduce QR SVG path data (unreliable), it's
+  told to emit a literal `[[QR_JOIN]]` / `[[QR_DISCORD]]` placeholder, which `Code.gs` substitutes
+  with the real, pre-generated SVG block (`JOIN_QR_SVG_BLOCK` / `DISCORD_QR_SVG_BLOCK`) before
+  returning the result — the model only ever decides *where*, never *what*.
 
 ### Endpoints (all on the one deployed web app URL)
 
@@ -79,6 +88,7 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Post communication | POST | `{ action: 'postCommunication', password, title, body, audience }` | Appends a Communications row with status `draft`; `audience` must be one of `COMM_AUDIENCE_CODES` |
 | Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow |
 | Delete communication | POST | `{ action: 'deleteCommunication', password, id }` | Removes a Communications row entirely — for stale/duplicate drafts |
+| Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
 | Published communications | GET | `?action=publishedCommunications&audience=<code>` | Public, no password — only `published` rows, newest first, optionally scoped to one program. Powers each updates-<program>.html |
 | Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published, every program), for admin.html's review lists |
 | Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |

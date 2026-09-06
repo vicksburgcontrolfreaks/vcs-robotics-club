@@ -5,8 +5,11 @@
 //
 // One-time setup after copying this into the Apps Script project:
 //   1. Project Settings → Script Properties → add ADMIN_PASSWORD = <a password only you know>
-//   2. Confirm SITE_URL below matches your GitHub Pages URL.
-//   3. Deploy → Manage deployments → edit the existing deployment → New version → Deploy.
+//   2. (Optional, for "Polish with AI" in the draft review panel) Script Properties → add
+//      ANTHROPIC_API_KEY = <an Anthropic API key>. Without it, the Polish button shows a clear
+//      error instead of failing silently; everything else works fine without it.
+//   3. Confirm SITE_URL below matches your GitHub Pages URL.
+//   4. Deploy → Manage deployments → edit the existing deployment → New version → Deploy.
 //      (Keeps the same /exec URL that's already pasted into parent_form.html.)
 //
 // Sheets used (auto-created on first use):
@@ -19,13 +22,20 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.5.0';
+const BACKEND_VERSION = '2.6.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
 const COMM_AUDIENCE_CODES = ['elementary', 'middle', 'high', 'lightweight'];
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 const CLUB_NAME = 'Vicksburg Robotics (Control Freaks)';
+const CLAUDE_MODEL = 'claude-opus-5';
+
+// Pre-generated, verified QR codes (see scan-card.html) — the AI polish step
+// inserts these verbatim rather than asking the model to reproduce SVG path
+// data itself, which LLMs render unreliably.
+const JOIN_QR_SVG_BLOCK = '<div class="comm-qr">\n  <a href="join.html" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51 51" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h51v51H0z"/><path stroke="#1a1a1a" d="M1 1.5h7m1 0h1m5 0h1m1 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m3 0h1m3 0h1m1 0h7M1 2.5h1m5 0h1m1 0h3m2 0h2m2 0h4m1 0h1m2 0h1m1 0h5m1 0h3m2 0h3m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h2m3 0h3m2 0h1m3 0h2m2 0h1m1 0h1m5 0h1m4 0h2m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m2 0h2m1 0h1m3 0h1m2 0h2m1 0h6m3 0h1m1 0h5m1 0h1m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h2m1 0h3m2 0h5m2 0h1m5 0h3m4 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h2m2 0h1m1 0h1m2 0h1m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m1 0h2m3 0h1m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h3m3 0h1m2 0h1m3 0h1m1 0h2M3 9.5h3m1 0h1m1 0h3m1 0h3m1 0h2m2 0h9m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h3M5 10.5h1m2 0h1m2 0h3m2 0h1m3 0h2m1 0h1m5 0h3m1 0h1m2 0h3m3 0h3m2 0h1M2 11.5h3m1 0h7m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m1 0h4m1 0h3m1 0h2M2 12.5h2m1 0h1m2 0h2m1 0h2m1 0h1m1 0h6m1 0h2m1 0h4m1 0h1m4 0h1m2 0h1m1 0h2m2 0h1M1 13.5h1m2 0h5m1 0h1m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h6m1 0h3m1 0h3m1 0h1m2 0h3M2 14.5h1m1 0h1m1 0h1m1 0h6m2 0h3m1 0h3m1 0h1m8 0h1m3 0h2m1 0h1m1 0h2m1 0h1m1 0h1M4 15.5h1m2 0h2m1 0h2m4 0h1m3 0h2m1 0h1m1 0h2m3 0h2m1 0h3m3 0h3m2 0h6M1 16.5h1m3 0h2m3 0h3m1 0h8m2 0h2m2 0h1m4 0h1m1 0h1m2 0h4m1 0h1m1 0h1m1 0h3M1 17.5h5m1 0h2m3 0h1m1 0h2m1 0h1m2 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m1 0h1m2 0h3m1 0h1m2 0h1M2 18.5h2m2 0h1m3 0h1m2 0h3m1 0h1m1 0h10m6 0h6m2 0h6M1 19.5h1m1 0h1m2 0h2m2 0h1m3 0h1m1 0h2m1 0h1m2 0h1m2 0h3m1 0h3m1 0h2m7 0h3m1 0h1m1 0h2M1 20.5h3m2 0h1m5 0h2m2 0h1m2 0h1m1 0h1m4 0h1m2 0h2m3 0h1m3 0h3m2 0h3M2 21.5h3m2 0h2m4 0h3m1 0h1m2 0h1m2 0h2m4 0h1m2 0h1m2 0h1m1 0h5m1 0h2m2 0h1m1 0h1M6 22.5h1m2 0h1m1 0h3m1 0h1m4 0h1m1 0h2m1 0h4m2 0h1m1 0h1m8 0h2M1 23.5h1m3 0h5m1 0h2m2 0h2m2 0h1m2 0h7m3 0h4m1 0h1m1 0h1m1 0h5m2 0h2M5 24.5h1m3 0h1m2 0h3m2 0h2m4 0h1m3 0h1m4 0h1m5 0h1m2 0h1m3 0h1m3 0h1M3 25.5h1m1 0h1m1 0h1m1 0h3m5 0h1m1 0h2m2 0h1m1 0h1m1 0h1m2 0h1m3 0h4m3 0h1m1 0h1m1 0h1m1 0h3M2 26.5h4m3 0h1m4 0h5m1 0h2m1 0h1m3 0h1m3 0h2m3 0h1m1 0h1m2 0h1m3 0h5M1 27.5h3m1 0h12m1 0h3m2 0h5m1 0h1m1 0h1m3 0h2m1 0h8m1 0h1m1 0h1M1 28.5h3m1 0h2m1 0h1m4 0h2m3 0h2m2 0h1m2 0h1m2 0h1m1 0h2m2 0h2m3 0h1m1 0h2m1 0h1m3 0h2M2 29.5h1m1 0h1m1 0h5m2 0h5m1 0h1m2 0h3m4 0h2m1 0h2m2 0h2m2 0h2m1 0h1m3 0h1m1 0h1M1 30.5h4m4 0h6m2 0h1m1 0h2m3 0h2m1 0h1m3 0h1m1 0h1m4 0h1m2 0h2m1 0h3M1 31.5h3m1 0h1m1 0h2m2 0h2m1 0h2m2 0h1m1 0h1m2 0h2m2 0h3m1 0h9m1 0h3m1 0h1m1 0h3M1 32.5h1m2 0h2m3 0h2m2 0h1m2 0h3m1 0h5m4 0h1m4 0h1m2 0h3m1 0h1m2 0h2m2 0h1M3 33.5h5m1 0h1m2 0h6m4 0h2m1 0h1m2 0h1m2 0h3m1 0h2m1 0h6m1 0h1m1 0h1m1 0h1M1 34.5h1m1 0h1m1 0h1m2 0h3m2 0h1m1 0h3m3 0h2m4 0h1m2 0h2m1 0h2m3 0h1m1 0h1m1 0h1m5 0h1M7 35.5h1m1 0h1m2 0h1m2 0h2m1 0h1m8 0h1m2 0h1m1 0h5m1 0h2m2 0h2m1 0h1m2 0h2M1 36.5h6m1 0h3m1 0h1m1 0h2m1 0h3m1 0h2m3 0h1m8 0h1m2 0h2m1 0h1m6 0h1M2 37.5h4m1 0h3m1 0h2m2 0h1m2 0h2m3 0h4m1 0h2m1 0h1m4 0h2m1 0h3m1 0h1m1 0h4M1 38.5h2m1 0h1m1 0h1m2 0h2m4 0h5m2 0h4m3 0h3m9 0h1m4 0h1M2 39.5h1m3 0h3m3 0h2m2 0h2m1 0h1m1 0h1m2 0h2m3 0h2m1 0h5m2 0h1m1 0h5m2 0h2M2 40.5h3m5 0h5m1 0h3m1 0h3m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m11 0h1m1 0h2M1 41.5h3m3 0h1m2 0h1m1 0h2m4 0h1m4 0h5m1 0h1m2 0h1m3 0h3m1 0h6m2 0h2M9 42.5h4m3 0h1m1 0h2m3 0h1m3 0h1m2 0h1m1 0h1m1 0h1m2 0h1m3 0h1m3 0h1M1 43.5h7m3 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h1m1 0h1m2 0h1m1 0h2m2 0h3m2 0h1m1 0h1m1 0h2m1 0h2M1 44.5h1m5 0h1m2 0h1m3 0h2m4 0h1m2 0h1m3 0h2m1 0h1m2 0h3m2 0h4m3 0h1m2 0h1M1 45.5h1m1 0h3m1 0h1m1 0h2m5 0h1m3 0h8m2 0h2m3 0h11m1 0h1m1 0h1M1 46.5h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h3m3 0h2m2 0h1m2 0h1m1 0h3m2 0h3m1 0h1m4 0h2m2 0h1M1 47.5h1m1 0h3m1 0h1m1 0h1m4 0h1m1 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h4m1 0h5m1 0h1m4 0h4M1 48.5h1m5 0h1m4 0h3m2 0h3m1 0h1m2 0h1m1 0h6m1 0h2m5 0h6m3 0h1M1 49.5h7m3 0h1m6 0h1m4 0h1m2 0h2m1 0h4m1 0h4m1 0h1m1 0h1m4 0h4"/></svg></a>\n  <p>Scan or <a href="join.html" target="_blank">click here</a> to join the mailing list</p>\n</div>';
+const DISCORD_QR_SVG_BLOCK = '<div class="comm-qr">\n  <a href="https://discord.gg/CYyXr84r8" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h35v35H0z"/><path stroke="#1a1a1a" d="M1 1.5h7m2 0h1m1 0h4m1 0h1m1 0h5m1 0h1m1 0h7M1 2.5h1m5 0h1m2 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m1 0h2m1 0h7m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m3 0h2m1 0h1m2 0h2m1 0h3m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m2 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m2 0h1m1 0h1m2 0h3m1 0h2m1 0h3m2 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M11 8.5h3m1 0h1m1 0h1m1 0h1m1 0h1m3 0h1M4 9.5h2m1 0h2m5 0h1m1 0h3m2 0h1m1 0h1m6 0h2M1 10.5h1m2 0h3m2 0h1m1 0h1m5 0h2m1 0h3m1 0h1m1 0h1m1 0h4M3 11.5h1m1 0h1m1 0h3m3 0h2m1 0h1m3 0h2m1 0h3m1 0h2m3 0h2M1 12.5h1m2 0h1m1 0h1m1 0h1m1 0h3m1 0h2m2 0h2m1 0h11M3 13.5h3m1 0h4m1 0h4m1 0h1m2 0h3m2 0h1m1 0h4m2 0h1M1 14.5h3m1 0h2m3 0h1m4 0h3m4 0h1m1 0h1m1 0h1m1 0h2m1 0h2M1 15.5h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h1m2 0h1m2 0h2m3 0h4M1 16.5h1m2 0h2m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m3 0h1m2 0h5m2 0h1m1 0h1M1 17.5h2m3 0h5m1 0h1m8 0h1m2 0h1m1 0h2m4 0h1M1 18.5h1m2 0h3m1 0h4m1 0h1m2 0h3m1 0h4m1 0h6m1 0h2M1 19.5h1m2 0h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m6 0h1m1 0h2m2 0h2m1 0h1M1 20.5h1m1 0h3m3 0h8m3 0h2m2 0h2m1 0h1m2 0h4M1 21.5h7m1 0h1m2 0h1m2 0h1m5 0h1m3 0h2m1 0h1m1 0h1M1 22.5h1m1 0h2m1 0h1m1 0h3m2 0h2m1 0h2m1 0h1m2 0h2m2 0h4M1 23.5h1m2 0h1m1 0h3m2 0h1m3 0h4m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3M1 24.5h1m1 0h1m1 0h2m1 0h2m2 0h3m2 0h5m1 0h1m5 0h1m1 0h3M1 25.5h2m1 0h4m1 0h2m1 0h2m2 0h1m1 0h2m1 0h1m1 0h1m1 0h5m3 0h1M9 26.5h1m1 0h1m1 0h2m2 0h3m3 0h3m3 0h2m1 0h1M1 27.5h7m1 0h3m2 0h1m3 0h1m1 0h4m1 0h1m1 0h1m1 0h2M1 28.5h1m5 0h1m2 0h1m1 0h2m6 0h2m2 0h2m3 0h4M1 29.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m4 0h2m1 0h9M1 30.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h4m2 0h1m2 0h2m1 0h1m1 0h1m1 0h1M1 31.5h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m2 0h1m1 0h2m4 0h5M1 32.5h1m5 0h1m2 0h3m3 0h1m2 0h3m1 0h2m6 0h3M1 33.5h7m2 0h1m1 0h2m1 0h1m1 0h1m1 0h1m4 0h2m1 0h1m1 0h1m1 0h1"/></svg></a>\n  <p>Scan or <a href="https://discord.gg/CYyXr84r8" target="_blank">click here</a> to join our Discord</p>\n</div>';
 
 // ── Entry points ──────────────────────────────────────────────────────────
 
@@ -61,6 +71,10 @@ function doPost(e) {
 
     if (data.action === 'deleteCommunication') {
       return handleDeleteCommunication(data);
+    }
+
+    if (data.action === 'polishCommunication') {
+      return handlePolishCommunication(data);
     }
 
     // Legacy / family sign-up path — same shape parent_form.html has always sent.
@@ -357,6 +371,133 @@ function handleDeleteCommunication(data) {
   }
 
   return jsonOut({ status: 'error', message: 'Communication not found.' });
+}
+
+const AUDIENCE_LABELS_FOR_AI = {
+  elementary:  'Elementary Robotics',
+  middle:      'Middle School Robotics (FTC Teams 5618 & 6494)',
+  high:        'High School Robotics (FRC Team 8126)',
+  lightweight: 'Sponsors (a quarterly, low-volume program update)'
+};
+
+// Sends a draft's title/body to Claude for copyediting: fixes mistakes,
+// interprets intent (e.g. a sentence written to the AI editor rather than
+// the reader, like "share the QR code here"), and returns polished HTML +
+// a plain-text summary for the announcement email. Never auto-publishes —
+// the admin still reviews the result and clicks Publish themselves.
+function handlePolishCommunication(data) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || data.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const apiKey = PropertiesService.getScriptProperties().getProperty('ANTHROPIC_API_KEY');
+  if (!apiKey) {
+    return jsonOut({ status: 'error', message: "AI polish isn't configured yet — add an ANTHROPIC_API_KEY Script Property (see the setup note at the top of Code.gs)." });
+  }
+
+  const title = (data.title || '').trim();
+  const body = (data.body || '').trim();
+  if (!title || !body) {
+    return jsonOut({ status: 'error', message: 'Title and body are required before polishing.' });
+  }
+  const audienceLabel = AUDIENCE_LABELS_FOR_AI[data.audience] || 'the team';
+
+  const systemPrompt = [
+    'You copyedit team communications for Vicksburg Robotics (Control Freaks), a school robotics',
+    'program with four audiences: Elementary Robotics, Middle School Robotics (FTC Teams 5618 & 6494),',
+    'High School Robotics (FRC Team 8126), and Sponsors. This draft is addressed to: ' + audienceLabel + '.',
+    '',
+    'Rewrite the draft into clean HTML for direct embedding in a web page:',
+    '- Wrap each paragraph in <p>...</p>.',
+    '- If the content describes a schedule of dated events, you may use:',
+    '  <div class="comm-day">DATE</div>',
+    '  <div class="comm-event"><div class="comm-event-time">TIME</div><div class="comm-event-title">TITLE</div><p>DESCRIPTION</p></div>',
+    '- For an important safety/logistics warning, you may use:',
+    '  <div class="comm-alert"><div class="comm-alert-title">⚠️ TITLE</div><p>DESCRIPTION</p></div>',
+    '',
+    'CRITICAL — meta-instructions: the draft may contain a sentence written TO YOU (the editor)',
+    'rather than for the reader — e.g. "I also want to share the QR code for X" or "add a link here."',
+    'Never include such a sentence verbatim in the output. Instead:',
+    '  - If it asks to share/include the mailing-list sign-up QR code or link, insert exactly this',
+    '    placeholder on its own line: [[QR_JOIN]]',
+    '  - If it asks to share/include the Discord invite/QR code, insert exactly this placeholder on',
+    '    its own line: [[QR_DISCORD]]',
+    '  - For any other meta-instruction you cannot confidently resolve, leave it out of the body',
+    '    entirely and describe what\'s needed in the "notes" field instead — never invent a link,',
+    '    date, or fact to satisfy it.',
+    '',
+    'Also fix grammar/typos and tighten the wording — warm but professional, matching a school',
+    'robotics program\'s voice. Preserve every concrete fact (dates, times, locations, names, links)',
+    'exactly as given; never invent or alter one.',
+    '',
+    'Also write "summary": 3-6 short plain-text lines (no bullet characters), one concrete fact per',
+    'line, for a quick email digest.',
+    '',
+    'Respond with ONLY a JSON object, no markdown fences, no other text:',
+    '{"body": "<html>", "summary": "line1\\nline2\\n...", "notes": "anything needing human attention, or empty string"}'
+  ].join('\n');
+
+  const payload = {
+    model: CLAUDE_MODEL,
+    max_tokens: 4096,
+    output_config: { effort: 'medium' },
+    system: systemPrompt,
+    messages: [
+      { role: 'user', content: 'Title: ' + title + '\n\nDraft body:\n' + body }
+    ]
+  };
+
+  let response;
+  try {
+    response = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+  } catch (err) {
+    return jsonOut({ status: 'error', message: 'Could not reach the AI service: ' + err.message });
+  }
+
+  const code = response.getResponseCode();
+  if (code !== 200) {
+    return jsonOut({ status: 'error', message: 'AI service error (' + code + '): ' + response.getContentText().slice(0, 300) });
+  }
+
+  const result = JSON.parse(response.getContentText());
+  if (result.stop_reason === 'refusal') {
+    return jsonOut({ status: 'error', message: 'The AI declined to process this draft. Please edit it manually.' });
+  }
+
+  const textBlock = (result.content || []).filter(function (b) { return b.type === 'text'; })[0];
+  if (!textBlock) {
+    return jsonOut({ status: 'error', message: 'AI response had no usable text.' });
+  }
+
+  let parsed;
+  try {
+    const cleaned = textBlock.text.trim()
+      .replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '');
+    parsed = JSON.parse(cleaned);
+  } catch (err) {
+    return jsonOut({ status: 'error', message: 'Could not parse the AI response as JSON.' });
+  }
+
+  let polishedBody = String(parsed.body || '');
+  polishedBody = polishedBody.split('[[QR_JOIN]]').join(JOIN_QR_SVG_BLOCK);
+  polishedBody = polishedBody.split('[[QR_DISCORD]]').join(DISCORD_QR_SVG_BLOCK);
+
+  return jsonOut({
+    status: 'ok',
+    body: polishedBody,
+    summary: String(parsed.summary || ''),
+    notes: String(parsed.notes || '')
+  });
 }
 
 // Public — no password. Only published posts, newest first, optionally

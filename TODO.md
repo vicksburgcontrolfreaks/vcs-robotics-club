@@ -75,8 +75,7 @@ with an email loop attached.
 - [x] **Announcement email, program-scoped.** Each published post's "Compose announcement →" in
       admin.html targets only subscribers whose `Lists` include *that post's own* audience code, and
       copies Bcc/Subject/Body to the clipboard rather than relying on `mailto:`.
-- [ ] **Redeploy required (v2.5.0).** Added `deleteCommunication` — same steps as before, paste in
-      and redeploy a new version.
+- [x] **Redeploy done (v2.6.0).** `deleteCommunication` and `polishCommunication` both live.
 - [x] **Existing post retagged.** "Season Kickoff — Soft-Start Schedule" is `audience: 'middle'`,
       body corrected to "FTC Teams 5618 & 6494," SignUpGenius link added to the tailgate sign-up, and
       main dish corrected to hamburgers — all live via direct API calls.
@@ -100,12 +99,16 @@ with an email loop attached.
       a self-hosted, clickable QR code directly inside a communication post (used in the
       "Informational Meeting" draft to replace a meta-instruction sentence about sharing a QR code
       with an actual one, linking to join.html).
-- [ ] **AI-assisted draft polish — scoping, not built.** Asked for: a means in admin.html to have an
-      LLM proofread/interpret a draft (fix mistakes, professional tone, catch meta-instructions like
-      "share the QR code here" and actually fulfill them) before publish. Real design decision before
-      building: this needs a live LLM API call from `Code.gs` (`UrlFetchApp` to the Anthropic API),
-      which means an Anthropic API key stored as a Script Property — a new credential to obtain and
-      pay for, separate from `ADMIN_PASSWORD`. Not started; asked the user how they want to scope it.
+- [x] **AI-assisted draft polish, built for real.** "✨ Polish with AI" button in the draft review
+      panel — [apps-script/Code.gs](apps-script/Code.gs) `handlePolishCommunication()` calls Claude
+      (`claude-opus-5`, `UrlFetchApp` to `api.anthropic.com`, no SDK — Apps Script has none) to fix
+      mistakes, tighten tone, and catch meta-instructions written to the editor rather than the
+      reader — resolving "share the QR code here" into a real `[[QR_JOIN]]`/`[[QR_DISCORD]]`
+      placeholder that Code.gs substitutes with the actual pre-generated SVG (the model never
+      reproduces QR path data itself). Also returns a `summary` for the announcement email and a
+      `notes` field for anything it couldn't confidently resolve. Never auto-saves or auto-publishes
+      — the admin still reviews the result and clicks Publish. Bumped to v2.6.0.
+- [x] **`ANTHROPIC_API_KEY` Script Property added.** AI polish is live.
 
 ## Umbrella-program rebrand ✅ built — needs redeploy
 
@@ -125,8 +128,8 @@ page titles) no longer reads as FRC-8126-specific.
       [css/style.css](css/style.css) tokens (`--red`/`--red-dark`/`--black`/`--black-light` replacing
       `--navy`/`--gold`); `.btn-gold`/`.btn-navy` class *names* are unchanged (would've meant touching
       every page) but now render red/black respectively.
-- [ ] **Redeploy required.** Touched `apps-script/Code.gs` (CLUB_NAME, confirmation email footer) —
-      same steps as before.
+- [ ] **Redeploy required** (CLUB_NAME, confirmation email footer) — folded into the single v2.6.0
+      redeploy noted under Team communications above; no separate action needed.
 - [ ] **QR scan card still on the old palette.** The join-page QR artifact
       (https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858) is navy/gold from before
       this rebrand — worth regenerating to match, whenever convenient.
