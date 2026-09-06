@@ -365,7 +365,13 @@
               <strong>${c.title || ''}</strong>
               <div class="muted" style="font-size:12px;">${audienceLabel(c.audience)} · published ${fmtDate(c.publishedAt)}</div>
             </div>
-            <button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
+            ${c.announcedAt
+              ? `<span class="badge badge-subscribed">✓ Announced ${fmtDate(c.announcedAt)}</span>`
+              : `<div style="display:flex; gap:10px;">
+                   <button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
+                   <button type="button" class="btn btn-navy" data-announced-id="${c.id}">Mark as announced</button>
+                 </div>`
+            }
           </div>
         `).join('');
 
@@ -373,6 +379,21 @@
       btn.addEventListener('click', () => {
         const comm = published.find(c => c.id === btn.getAttribute('data-comm-id'));
         if (comm) composeAnnouncement(comm, btn);
+      });
+    });
+
+    publishedEl.querySelectorAll('button[data-announced-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const comm = published.find(c => c.id === btn.getAttribute('data-announced-id'));
+        if (!comm) return;
+        btn.disabled = true;
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'updateCommunication', password: currentPassword, id: comm.id, announcedAt: new Date().toISOString() })
+        });
+        const result = await res.json();
+        if (result.status === 'ok') loadCommunications();
+        else { alert(result.message || 'Could not update this post.'); btn.disabled = false; }
       });
     });
   }
@@ -395,6 +416,7 @@
     document.getElementById('edit-title').value = comm.title || '';
     document.getElementById('edit-body').value = comm.body || '';
     document.getElementById('edit-summary').value = comm.summary || '';
+    document.getElementById('edit-ai-instructions').value = '';
     document.getElementById('editError').style.display = 'none';
     document.getElementById('polishNotes').style.display = 'none';
     renderDraftPreview();
@@ -423,6 +445,7 @@
       return;
     }
 
+    const instructions = document.getElementById('edit-ai-instructions').value.trim();
     const btn = document.getElementById('polishBtn');
     btn.disabled = true;
     btn.textContent = 'Polishing…';
@@ -430,7 +453,7 @@
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'polishCommunication', password: currentPassword, title, body, audience })
+        body: JSON.stringify({ action: 'polishCommunication', password: currentPassword, title, body, audience, instructions })
       });
       const result = await res.json();
       if (result.status !== 'ok') throw new Error(result.message || 'AI polish failed.');

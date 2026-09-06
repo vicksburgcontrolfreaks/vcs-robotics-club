@@ -101,6 +101,8 @@
           <textarea id="edit-body" rows="10"></textarea>
           <label>Summary — one bullet per line, used in the announcement email</label>
           <textarea id="edit-summary" rows="4"></textarea>
+          <label>Instructions for AI (optional) — a note to Claude, not part of the post itself</label>
+          <textarea id="edit-ai-instructions" rows="2" placeholder="e.g. Add a QR code for the Discord link too, side by side with the mailing-list one."></textarea>
 
           <div style="margin-top:10px;">
             <button type="button" class="btn btn-gold" id="polishBtn">✨ Polish with AI</button>
@@ -124,7 +126,8 @@
           <p class="muted" style="font-size:12.5px; margin-top:-4px;">
             "Compose announcement" copies Bcc/Subject/Body to your clipboard — scoped to that
             post's own program, so only subscribers who opted into that specific list are
-            included. Paste it into a new email yourself.
+            included. Paste it into a new email yourself. Once you've sent it, click
+            "Mark as announced" — the post stays live either way, this just clears the action item.
           </p>
           <div id="commPublished" class="muted">Loading…</div>
         </div>

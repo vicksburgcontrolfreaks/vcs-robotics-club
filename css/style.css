@@ -318,3 +318,9 @@ table th { color: var(--black); font-size: 12px; text-transform: uppercase; lett
   border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: #fff;
 }
 .comm-qr p { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Two (or more) .comm-qr blocks placed side by side instead of stacked. */
+.comm-qr-row {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; margin: 20px 0;
+}
+.comm-qr-row .comm-qr { margin: 0; }
