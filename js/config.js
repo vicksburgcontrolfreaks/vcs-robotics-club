@@ -29,3 +29,15 @@ function listOptionsHtml(namePrefix) {
     return '<label><input type="checkbox" name="' + namePrefix + '" value="' + o.value + '"> ' + o.label + '</label>';
   }).join('');
 }
+
+// The four programs VCS Robotics communicates to. `value` codes intentionally
+// match LIST_OPTIONS above (elementary/middle/high/lightweight) — a
+// communication's audience and a subscriber's list preference are the same
+// vocabulary, so "Compose announcement" can match one to the other directly.
+// "Sponsors" reuses the 'lightweight' code — same low-volume audience.
+const COMM_AUDIENCES = [
+  { value: 'elementary',  label: 'Elementary Robotics',  teamLine: 'Team numbers coming soon',    page: 'updates-elementary.html' },
+  { value: 'middle',      label: 'Middle School Robotics', teamLine: 'FTC Teams 5618 & 6494',     page: 'updates-middle.html' },
+  { value: 'high',        label: 'High School Robotics', teamLine: 'FRC Team 8126',               page: 'updates-high.html' },
+  { value: 'lightweight', label: 'Sponsors',             teamLine: 'Quarterly program updates',    page: 'updates-sponsors.html' }
+];

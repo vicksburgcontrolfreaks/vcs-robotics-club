@@ -12,13 +12,18 @@
 // Sheets used (auto-created on first use):
 //   "Parent Submissions" — one row per child, from the full family sign-up form (unchanged from before).
 //   "Subscribers"         — one row per mailing-list contact, with a token used for unsubscribe links.
-//   "Communications"      — team update posts. Drafted from admin.html, then reviewed/formatted and
-//                           published by Claude before they're ever public — see updates.html.
+//   "Communications"      — team update posts, one per program (Elementary/Middle/High/Sponsors).
+//                           Drafted from admin.html, then reviewed/formatted and published by
+//                           Claude before they're ever public — see updates-<program>.html.
 
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.3.0';
+const BACKEND_VERSION = '2.4.0';
+// Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
+// high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
+// every Communication is tagged with exactly one of these.
+const COMM_AUDIENCE_CODES = ['elementary', 'middle', 'high', 'lightweight'];
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 const CLUB_NAME = 'VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)';
 
@@ -29,7 +34,7 @@ function doGet(e) {
   try {
     if (params.action === 'unsubscribe') return handleUnsubscribe(params);
     if (params.action === 'list') return handleList(params);
-    if (params.action === 'publishedCommunications') return handlePublishedCommunications();
+    if (params.action === 'publishedCommunications') return handlePublishedCommunications(params);
     if (params.action === 'communicationsAdmin') return handleCommunicationsAdmin(params);
     if (params.action === 'rosterAdmin') return handleRosterAdmin(params);
     return jsonOut({ status: 'ok', version: BACKEND_VERSION });
@@ -272,14 +277,18 @@ function handlePostCommunication(data) {
 
   const title = (data.title || '').trim();
   const body = (data.body || '').trim();
+  const audience = data.audience;
   if (!title || !body) {
     return jsonOut({ status: 'error', message: 'Title and content are both required.' });
+  }
+  if (COMM_AUDIENCE_CODES.indexOf(audience) === -1) {
+    return jsonOut({ status: 'error', message: 'Please choose which program this is for.' });
   }
 
   const sheet = getOrCreateCommunicationsSheet();
   const id = Utilities.getUuid();
   const now = new Date().toISOString();
-  sheet.appendRow([id, now, title, body, '', 'draft', '']);
+  sheet.appendRow([id, now, title, body, '', 'draft', '', audience]);
   return jsonOut({ status: 'ok', id: id });
 }
 
@@ -301,14 +310,20 @@ function handleUpdateCommunication(data) {
   for (let i = 1; i < values.length; i++) {
     if (String(values[i][0]) === String(id)) {
       const rowNum = i + 1;
-      if (data.title   !== undefined) sheet.getRange(rowNum, 3).setValue(data.title);
-      if (data.body    !== undefined) sheet.getRange(rowNum, 4).setValue(data.body);
-      if (data.summary !== undefined) sheet.getRange(rowNum, 5).setValue(data.summary);
-      if (data.status  !== undefined) {
+      if (data.title    !== undefined) sheet.getRange(rowNum, 3).setValue(data.title);
+      if (data.body     !== undefined) sheet.getRange(rowNum, 4).setValue(data.body);
+      if (data.summary  !== undefined) sheet.getRange(rowNum, 5).setValue(data.summary);
+      if (data.status   !== undefined) {
         sheet.getRange(rowNum, 6).setValue(data.status);
         if (data.status === 'published') {
           sheet.getRange(rowNum, 7).setValue(new Date().toISOString());
         }
+      }
+      if (data.audience !== undefined) {
+        if (COMM_AUDIENCE_CODES.indexOf(data.audience) === -1) {
+          return jsonOut({ status: 'error', message: 'Unknown audience code.' });
+        }
+        sheet.getRange(rowNum, 8).setValue(data.audience);
       }
       return jsonOut({ status: 'ok' });
     }
@@ -317,17 +332,21 @@ function handleUpdateCommunication(data) {
   return jsonOut({ status: 'error', message: 'Communication not found.' });
 }
 
-// Public — no password. Only published posts, newest first. Powers updates.html.
-function handlePublishedCommunications() {
+// Public — no password. Only published posts, newest first, optionally
+// scoped to one program via ?audience=. Powers updates-<program>.html.
+function handlePublishedCommunications(params) {
+  const audienceFilter = params && params.audience;
   const sheet = getOrCreateCommunicationsSheet();
   const values = sheet.getDataRange().getValues();
   const rows = [];
   for (let i = 1; i < values.length; i++) {
     if (values[i][5] !== 'published') continue;
+    if (audienceFilter && values[i][7] !== audienceFilter) continue;
     rows.push({
       id: values[i][0],
       title: values[i][2],
       body: values[i][3],
+      audience: values[i][7] || '',
       publishedAt: values[i][6] || values[i][1]
     });
   }
@@ -353,7 +372,8 @@ function handleCommunicationsAdmin(params) {
       body: values[i][3],
       summary: values[i][4],
       status: values[i][5],
-      publishedAt: values[i][6]
+      publishedAt: values[i][6],
+      audience: values[i][7] || ''
     });
   }
   rows.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
@@ -366,12 +386,13 @@ function getOrCreateCommunicationsSheet() {
   if (!sheet) {
     sheet = ss.insertSheet(COMMUNICATIONS_SHEET);
     sheet.appendRow([
-      'ID', 'Created At', 'Title', 'Body', 'Summary', 'Status', 'Published At'
+      'ID', 'Created At', 'Title', 'Body', 'Summary', 'Status', 'Published At', 'Audience'
     ]);
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(1, 220); // id
     sheet.setColumnWidth(4, 400); // body
     sheet.setColumnWidth(5, 300); // summary
+    sheet.setColumnWidth(8, 120); // audience
   }
   return sheet;
 }

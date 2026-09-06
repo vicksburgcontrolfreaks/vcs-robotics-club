@@ -40,43 +40,58 @@ Nothing here is implemented yet — this is planning only.
       could cover sponsorship tiers/benefits, a thank-you list of current sponsors (logos), and the
       RevTrak link — decide whether the join.html card stays as its own quick CTA or links through
       to this page instead.
-- [ ] **Per-club pages: Elementary, Middle School, High School.** Three separate pages, each with
-      that team's own info (meeting times/location, coaches or leads, roster, season updates
-      specific to that level). Ties into the mailing-list segmentation already built — each page
-      could deep-link to join.html with that team's checkbox pre-selected. Site nav will need to
-      grow to fit three more pages (dropdown vs. three new top-level links — decide when starting).
+- [x] **Per-program communications pages: Elementary, Middle School, High School, Sponsors.**
+      Built as `updates-elementary.html` / `updates-middle.html` / `updates-high.html` /
+      `updates-sponsors.html` — see Team communications below. Still open: a fuller "about this
+      program" page per team (meeting times/location, coaches or leads, roster) — the updates pages
+      are just the communications archive, not a full team-info page. Each could deep-link to
+      join.html with that team's checkbox pre-selected once built.
 - [ ] **Class pages: AER (Applied Engineering and Robotics) and DBL (Design and Build Lab).** Two
       more pages, one per class — distinct from the three club-team pages above (these are CTE
       classes, not the extracurricular club). Will likely pull content from the CTE repo's `8AER`,
       `HSAER`, and `Design and Build Lab` folders — design/layout still to be worked out later.
 
-## Team communications ✅ built — needs redeploy
+## Team communications ✅ built — needs redeploy (v2.4.0)
 
-Supersedes the old "season update page" idea — built as an ongoing archive instead of one static
-page, with an email loop attached.
+Supersedes the old "season update page" idea — one archive per program instead of one static page,
+with an email loop attached.
 
-- [x] **Public archive page.** [updates.html](updates.html) — every published communication, newest
-      first, fetched live from the Communications sheet (no rebuild/redeploy needed per post).
-- [x] **Admin draft + review flow.** [admin.html](admin.html) — paste raw notes into "Team
-      communications," saved as a `draft` row. Nothing is public yet. Ask Claude to review/reformat
-      a draft to match the site's `.comm-*` styles ([css/style.css](css/style.css)) and publish it —
-      that's the "conform to page format standards" step, intentionally not a one-click bypass in
-      the UI.
-- [x] **Backend.** [apps-script/Code.gs](apps-script/Code.gs) — new `Communications` sheet;
-      `postCommunication` (draft), `updateCommunication` (Claude-facing refine+publish),
-      `publishedCommunications` (public, powers updates.html), `communicationsAdmin` (password-gated,
-      powers the admin review lists). Bumped to v2.3.0.
-- [x] **Announcement email.** Each published post gets a "Compose announcement →" button in
-      admin.html — builds a `mailto:` with a bullet-point summary + a deep link to that post
-      (`updates.html#c-<id>`), Bcc'd to subscribed emails **excluding lightweight-only** subscribers
-      (they get the quarterly digest instead; anyone on a team list too still gets it).
-- [x] **Redeploy required.** Done — `apps-script/Code.gs` v2.3.0 redeployed live.
-- [x] **First post live:** "Season Kickoff — Soft-Start Schedule" is published on
-      [updates.html](updates.html). Still needs its announcement email sent from admin.html
-      ("Compose announcement →") whenever you're ready.
+- [x] **Four public archive pages, one per program.** `updates-elementary.html` / `updates-middle.html`
+      / `updates-high.html` / `updates-sponsors.html` — each fetches only its own program's published
+      posts (`?action=publishedCommunications&audience=<code>`), newest first, live (no
+      rebuild/redeploy needed per post). [updates.html](updates.html) is now a hub linking to all four
+      — nav everywhere still just points to that one hub, per program pages aren't in the top nav.
+- [x] **Admin draft + review flow.** [admin.html](admin.html) — pick the **Program** (Elementary/
+      Middle/High/Sponsors), paste raw notes, save as a `draft` row. Nothing is public yet. Ask Claude
+      to review/reformat a draft to match the site's `.comm-*` styles
+      ([css/style.css](css/style.css)) and publish it — that's the "conform to page format standards"
+      step, intentionally not a one-click bypass in the UI.
+- [x] **Backend.** [apps-script/Code.gs](apps-script/Code.gs) — `Communications` sheet gained an
+      `Audience` column (`elementary`/`middle`/`high`/`lightweight`, same codes as `Lists`);
+      `postCommunication` requires it, `publishedCommunications` filters by it,
+      `updateCommunication`/`communicationsAdmin` carry it through. Bumped to v2.4.0.
+- [x] **Announcement email, now program-scoped.** Each published post's "Compose announcement →" in
+      admin.html targets only subscribers whose `Lists` include *that post's own* audience code —
+      not "everyone except sponsors" like the first version. A Sponsors post correctly reaches only
+      `lightweight` subscribers.
+- [ ] **Redeploy required.** This changed `apps-script/Code.gs` again (Audience column/validation) —
+      same steps as before, paste in and redeploy a new version.
+- [ ] **Existing post needs retagging:** "Season Kickoff — Soft-Start Schedule" was published before
+      the Audience column existed — needs `audience: 'middle'` set, and its body's "FRC Team 8126"
+      reference corrected to "FTC Teams 5618 & 6494" (it's a Middle School post). Waiting on the
+      redeploy above before this can be sent via the API.
 - [ ] **Quarterly lightweight digest** still needs its own thing — a periodic rollup of recent
-      communications, sent only to lightweight subscribers. Not built yet; the per-post announcement
-      above intentionally excludes them.
+      communications across all programs, sent only to Sponsors (`lightweight`) subscribers.
+
+## Umbrella-program branding (flagged, not started)
+
+Learned while building the four communication pages: **FRC Team 8126 is specifically the High
+School team** — VCS Robotics is actually the umbrella over four programs (Elementary, Middle School
+[FTC 5618 & 6494], High School [FRC 8126], Sponsors). The site currently brands itself site-wide as
+"VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)" in the header, footer, and About page —
+worth revisiting whether the homepage/header should present as the umbrella program instead of
+reading as FRC-8126-specific, now that Elementary/Middle School have their own identity on the site
+too. Not touched yet — flagging for a deliberate decision, not a drive-by rename.
 
 ## Admin page extras ✅ built — needs redeploy
 

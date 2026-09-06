@@ -71,6 +71,8 @@
           <a href="updates.html" target="_blank">updates.html</a> or become available to announce.
         </p>
         <div class="card">
+          <label>Program</label>
+          <select id="comm-audience"><option value="">Select a program…</option></select>
           <label>Title</label>
           <input type="text" id="comm-title" placeholder="e.g. Season Kickoff — Soft-Start Schedule">
           <label>Content</label>
@@ -88,7 +90,8 @@
         <div style="margin-top:20px;">
           <h3 style="color:var(--navy); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Published</h3>
           <p class="muted" style="font-size:12.5px; margin-top:-4px;">
-            "Compose announcement" excludes lightweight (quarterly-only) subscribers — they get the quarterly digest instead.
+            "Compose announcement" is scoped to that post's own program — only subscribers who
+            opted into that specific list get it.
           </p>
           <div id="commPublished" class="muted">Loading…</div>
         </div>
