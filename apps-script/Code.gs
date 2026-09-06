@@ -13,13 +13,13 @@
 //   "Parent Submissions" — one row per child, from the full family sign-up form (unchanged from before).
 //   "Subscribers"         — one row per mailing-list contact, with a token used for unsubscribe links.
 //   "Communications"      — team update posts, one per program (Elementary/Middle/High/Sponsors).
-//                           Drafted from admin.html, then reviewed/formatted and published by
-//                           Claude before they're ever public — see updates-<program>.html.
+//                           Drafted, reviewed, and published directly from admin.html — see
+//                           updates-<program>.html.
 
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.4.0';
+const BACKEND_VERSION = '2.5.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
@@ -57,6 +57,10 @@ function doPost(e) {
 
     if (data.action === 'updateCommunication') {
       return handleUpdateCommunication(data);
+    }
+
+    if (data.action === 'deleteCommunication') {
+      return handleDeleteCommunication(data);
     }
 
     // Legacy / family sign-up path — same shape parent_form.html has always sent.
@@ -325,6 +329,29 @@ function handleUpdateCommunication(data) {
         }
         sheet.getRange(rowNum, 8).setValue(data.audience);
       }
+      return jsonOut({ status: 'ok' });
+    }
+  }
+
+  return jsonOut({ status: 'error', message: 'Communication not found.' });
+}
+
+// Removes a row entirely — for stale/duplicate drafts, not a public "unpublish."
+function handleDeleteCommunication(data) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || data.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const id = data.id;
+  if (!id) return jsonOut({ status: 'error', message: 'Missing communication ID.' });
+
+  const sheet = getOrCreateCommunicationsSheet();
+  const values = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(id)) {
+      sheet.deleteRow(i + 1);
       return jsonOut({ status: 'ok' });
     }
   }

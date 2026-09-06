@@ -61,24 +61,29 @@ with an email loop attached.
       posts (`?action=publishedCommunications&audience=<code>`), newest first, live (no
       rebuild/redeploy needed per post). [updates.html](updates.html) is now a hub linking to all four
       — nav everywhere still just points to that one hub, per program pages aren't in the top nav.
-- [x] **Admin draft + review flow.** [admin.html](admin.html) — pick the **Program** (Elementary/
-      Middle/High/Sponsors), paste raw notes, save as a `draft` row. Nothing is public yet. Ask Claude
-      to review/reformat a draft to match the site's `.comm-*` styles
-      ([css/style.css](css/style.css)) and publish it — that's the "conform to page format standards"
-      step, intentionally not a one-click bypass in the UI.
+- [x] **Admin draft + in-browser review/publish flow.** [admin.html](admin.html) — pick the
+      **Program**, paste raw notes, save as a `draft` row. Each draft gets **Review & publish →**
+      (opens an editable Title/Body/Summary panel with a live preview rendered in the site's
+      `.comm-*` styles — plain text auto-formats into paragraphs with links, real HTML passes
+      through as-is) and **Delete** (for stale/duplicate drafts). Publishing happens directly from
+      the browser now — no Claude round-trip required.
 - [x] **Backend.** [apps-script/Code.gs](apps-script/Code.gs) — `Communications` sheet gained an
       `Audience` column (`elementary`/`middle`/`high`/`lightweight`, same codes as `Lists`);
       `postCommunication` requires it, `publishedCommunications` filters by it,
-      `updateCommunication`/`communicationsAdmin` carry it through. Bumped to v2.4.0.
-- [x] **Announcement email, now program-scoped.** Each published post's "Compose announcement →" in
-      admin.html targets only subscribers whose `Lists` include *that post's own* audience code —
-      not "everyone except sponsors" like the first version. A Sponsors post correctly reaches only
-      `lightweight` subscribers.
-- [ ] **Redeploy required.** This changed `apps-script/Code.gs` again (Audience column/validation) —
-      same steps as before, paste in and redeploy a new version.
+      `updateCommunication`/`communicationsAdmin` carry it through; new `deleteCommunication` removes
+      a row entirely. Bumped to v2.5.0.
+- [x] **Announcement email, program-scoped.** Each published post's "Compose announcement →" in
+      admin.html targets only subscribers whose `Lists` include *that post's own* audience code, and
+      copies Bcc/Subject/Body to the clipboard rather than relying on `mailto:`.
+- [ ] **Redeploy required (v2.5.0).** Added `deleteCommunication` — same steps as before, paste in
+      and redeploy a new version.
 - [x] **Existing post retagged.** "Season Kickoff — Soft-Start Schedule" is `audience: 'middle'`,
       body corrected to "FTC Teams 5618 & 6494," SignUpGenius link added to the tailgate sign-up, and
       main dish corrected to hamburgers — all live via direct API calls.
+- [ ] **Stale duplicate draft to delete** once v2.5.0 is redeployed: a second, pre-refinement copy
+      of "Season Kickoff — Soft-Start Schedule" (id `b3fe76d3...`) was saved via admin.html's own
+      form a few seconds before the refined version was published directly — same title, "hot dogs"/
+      "FRC Team 8126" (pre-fix wording), no audience set. Safe to delete once Delete is live.
 - [ ] **Quarterly lightweight digest** still needs its own thing — a periodic rollup of recent
       communications across all programs, sent only to Sponsors (`lightweight`) subscribers.
 

@@ -64,9 +64,9 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 - **Communications** — team update posts: ID, timestamps, title, body (HTML), a plain-text summary
   (used for the announcement email), status (`draft` / `published`), and an `Audience` column — one
   of `elementary` / `middle` / `high` / `lightweight` (same codes as `Lists` above; `lightweight` =
-  Sponsors). Drafts are written from admin.html; only Claude flips a draft to `published` (after
-  reviewing/reformatting it), which is what makes it appear on that program's
-  `updates-<program>.html` page.
+  Sponsors). Drafts are written from admin.html; review, edit, and publish also happen there
+  (in-browser, no Claude round-trip needed) — publishing is what makes a post appear on that
+  program's `updates-<program>.html` page.
 
 ### Endpoints (all on the one deployed web app URL)
 
@@ -77,7 +77,8 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Unsubscribe | GET | `?action=unsubscribe&token=...` | Marks the matching Subscriber row `unsubscribed` |
 | Admin list | GET | `?action=list&password=...` | Returns all Subscriber rows as JSON if password matches `ADMIN_PASSWORD` |
 | Post communication | POST | `{ action: 'postCommunication', password, title, body, audience }` | Appends a Communications row with status `draft`; `audience` must be one of `COMM_AUDIENCE_CODES` |
-| Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience? }` | Claude-facing: overwrites only the fields given; `status: 'published'` also stamps Published At |
+| Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow |
+| Delete communication | POST | `{ action: 'deleteCommunication', password, id }` | Removes a Communications row entirely — for stale/duplicate drafts |
 | Published communications | GET | `?action=publishedCommunications&audience=<code>` | Public, no password — only `published` rows, newest first, optionally scoped to one program. Powers each updates-<program>.html |
 | Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published, every program), for admin.html's review lists |
 | Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |
@@ -90,8 +91,10 @@ committed to this repo). This is a low-stakes convenience gate, not strong secur
 sent as a URL query parameter, so avoid reusing a password used elsewhere.
 
 Besides the subscriber list/export, admin.html also holds: quick links out to the join-page QR
-scan card and updates.html; a communications draft form + review lists (see Communications above);
-and the team roster with a shirt-size tally + CSV export, pulled straight from Parent Submissions.
+scan card and updates.html; a communications draft form with an in-browser review/edit/publish
+flow (live preview, plain-text auto-formatted into paragraphs) and per-draft delete (see
+Communications above); and the team roster with a shirt-size tally + CSV export, pulled straight
+from Parent Submissions.
 
 ## Local development
 

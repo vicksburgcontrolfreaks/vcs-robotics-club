@@ -22,14 +22,36 @@
     return map;
   }, {});
 
-  // Populate the "which program is this post for" dropdown.
+  // Populate the "which program is this post for" dropdown (both the new-draft
+  // form and the review editor use the same option set).
   const commAudienceEl = document.getElementById('comm-audience');
+  const editAudienceEl = document.getElementById('edit-audience');
   COMM_AUDIENCES.forEach(a => {
-    const opt = document.createElement('option');
-    opt.value = a.value;
-    opt.textContent = a.label;
-    commAudienceEl.appendChild(opt);
+    [commAudienceEl, editAudienceEl].forEach(sel => {
+      const opt = document.createElement('option');
+      opt.value = a.value;
+      opt.textContent = a.label;
+      sel.appendChild(opt);
+    });
   });
+
+  // Turns a plain-text draft into readable HTML: blank-line-separated
+  // paragraphs, escaped, with bare URLs auto-linked. If the text already
+  // contains a tag, it's trusted as authored HTML and passed through as-is
+  // (e.g. a post someone hand-wrote with .comm-day/.comm-event markup).
+  function plainTextToHtml(text) {
+    const str = String(text || '').trim();
+    if (!str) return '';
+    if (/<[a-z][\s\S]*>/i.test(str)) return str;
+
+    const escapeHtml = s => s
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const linkify = s => s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+
+    return str.split(/\n\s*\n/)
+      .map(para => '<p>' + linkify(escapeHtml(para.trim())).replace(/\n/g, '<br>') + '</p>')
+      .join('\n');
+  }
 
   function fmtDate(v) {
     if (!v) return '';
@@ -301,12 +323,38 @@
             <div class="card" style="margin-bottom:10px;">
               <strong>${c.title || '(untitled)'}</strong>
               <div class="muted" style="font-size:12px; margin:2px 0 8px;">
-                ${audienceLabel(c.audience)} · saved ${fmtDate(c.createdAt)} · pending Claude's review before it publishes
+                ${audienceLabel(c.audience)} · saved ${fmtDate(c.createdAt)}
               </div>
-              <div style="font-size:13px; color:var(--muted); white-space:pre-wrap;">${preview}${truncated ? '…' : ''}</div>
+              <div style="font-size:13px; color:var(--muted); white-space:pre-wrap; margin-bottom:10px;">${preview}${truncated ? '…' : ''}</div>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-gold" data-review-id="${c.id}">Review &amp; publish →</button>
+                <button type="button" class="btn btn-navy" data-delete-id="${c.id}">Delete</button>
+              </div>
             </div>
           `;
         }).join('');
+
+    draftsEl.querySelectorAll('button[data-review-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const comm = drafts.find(c => c.id === btn.getAttribute('data-review-id'));
+        if (comm) openDraftEditor(comm);
+      });
+    });
+
+    draftsEl.querySelectorAll('button[data-delete-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const comm = drafts.find(c => c.id === btn.getAttribute('data-delete-id'));
+        if (!comm) return;
+        if (!confirm('Delete this draft permanently? "' + (comm.title || '(untitled)') + '"')) return;
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'deleteCommunication', password: currentPassword, id: comm.id })
+        });
+        const result = await res.json();
+        if (result.status === 'ok') loadCommunications();
+        else alert(result.message || 'Could not delete this draft.');
+      });
+    });
 
     const publishedEl = document.getElementById('commPublished');
     publishedEl.innerHTML = published.length === 0
@@ -328,6 +376,94 @@
       });
     });
   }
+
+  // ── Draft review & publish (in-browser, no round-trip needed) ────────────
+  let editingCommId = null;
+
+  function renderDraftPreview() {
+    const title = document.getElementById('edit-title').value.trim();
+    const body = document.getElementById('edit-body').value;
+    document.getElementById('draftPreview').innerHTML =
+      '<div class="comm-date">' + fmtDate(new Date().toISOString()) + '</div>' +
+      '<h2>' + (title || '(untitled)') + '</h2>' +
+      plainTextToHtml(body);
+  }
+
+  function openDraftEditor(comm) {
+    editingCommId = comm.id;
+    document.getElementById('edit-audience').value = comm.audience || '';
+    document.getElementById('edit-title').value = comm.title || '';
+    document.getElementById('edit-body').value = comm.body || '';
+    document.getElementById('edit-summary').value = comm.summary || '';
+    document.getElementById('editError').style.display = 'none';
+    renderDraftPreview();
+    const editor = document.getElementById('draftEditor');
+    editor.style.display = 'block';
+    editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  ['edit-title', 'edit-body'].forEach(id => {
+    document.getElementById(id).addEventListener('input', renderDraftPreview);
+  });
+
+  document.getElementById('cancelEditBtn').addEventListener('click', () => {
+    editingCommId = null;
+    document.getElementById('draftEditor').style.display = 'none';
+  });
+
+  document.getElementById('publishDraftBtn').addEventListener('click', async () => {
+    if (!editingCommId) return;
+    const errorEl = document.getElementById('editError');
+    errorEl.style.display = 'none';
+
+    const audience = document.getElementById('edit-audience').value;
+    const title = document.getElementById('edit-title').value.trim();
+    const rawBody = document.getElementById('edit-body').value.trim();
+    const summary = document.getElementById('edit-summary').value.trim();
+
+    if (!audience) {
+      errorEl.textContent = 'Please choose which program this is for.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!title || !rawBody) {
+      errorEl.textContent = 'Title and body are both required.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('publishDraftBtn');
+    btn.disabled = true;
+    btn.textContent = 'Publishing…';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'updateCommunication',
+          password: currentPassword,
+          id: editingCommId,
+          audience,
+          title,
+          body: plainTextToHtml(rawBody),
+          summary,
+          status: 'published'
+        })
+      });
+      const result = await res.json();
+      if (result.status !== 'ok') throw new Error(result.message || 'Server error');
+
+      editingCommId = null;
+      document.getElementById('draftEditor').style.display = 'none';
+      loadCommunications();
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Publish →';
+    }
+  });
 
   document.getElementById('commSaveBtn').addEventListener('click', async () => {
     if (!currentPassword) return;
