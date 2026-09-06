@@ -26,6 +26,11 @@
       <h1>Mailing list subscribers</h1>
       <p class="muted">Teacher/lead access only. This page is unlisted — do not share the link publicly.</p>
 
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 24px;">
+        <a class="btn btn-navy" href="https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858" target="_blank" rel="noopener">Scan card (QR) →</a>
+        <a class="btn btn-navy" href="updates.html" target="_blank">Updates page →</a>
+      </div>
+
       <div class="card" id="loginCard">
         <h2>Enter password</h2>
         <label>Admin password</label>
@@ -53,6 +58,55 @@
             <thead>
               <tr>
                 <th>Name</th><th>Email</th><th>Status</th><th>Lists</th><th>Source</th><th>Subscribed</th><th>Unsubscribed</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <h2 style="margin-top:36px;">Team communications</h2>
+        <p class="muted" style="font-size:13px;">
+          Paste raw notes below and save as a draft — nothing here goes live yet. Ask Claude to
+          review it, format it to match the site, and publish it; only then does it appear on
+          <a href="updates.html" target="_blank">updates.html</a> or become available to announce.
+        </p>
+        <div class="card">
+          <label>Title</label>
+          <input type="text" id="comm-title" placeholder="e.g. Season Kickoff — Soft-Start Schedule">
+          <label>Content</label>
+          <textarea id="comm-body" rows="10" placeholder="Paste your notes, a Word doc export, whatever you've got — plain text or HTML both fine."></textarea>
+          <div class="error-msg" id="commError"></div>
+          <div class="info-msg" id="commInfo"></div>
+          <button type="button" class="submit-btn" id="commSaveBtn">Save draft</button>
+        </div>
+
+        <div style="margin-top:20px;">
+          <h3 style="color:var(--navy); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Drafts pending review</h3>
+          <div id="commDrafts" class="muted">Loading…</div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <h3 style="color:var(--navy); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Published</h3>
+          <p class="muted" style="font-size:12.5px; margin-top:-4px;">
+            "Compose announcement" excludes lightweight (quarterly-only) subscribers — they get the quarterly digest instead.
+          </p>
+          <div id="commPublished" class="muted">Loading…</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:36px 0 12px;">
+          <h2 style="margin:0;">Team roster &amp; shirt sizes</h2>
+          <button type="button" class="btn btn-gold" id="rosterExportBtn">Download CSV</button>
+        </div>
+        <p class="muted" style="font-size:13px; margin-top:-6px;">
+          Pulled straight from Parent Submissions — one row per child, so this doubles as your
+          shirt order list.
+        </p>
+        <div class="grid" id="rosterSizeTally" style="margin-bottom:16px;"></div>
+        <div class="card" style="overflow-x:auto;">
+          <table id="rosterTable">
+            <thead>
+              <tr>
+                <th>Child</th><th>Grade</th><th>Shirt Size</th><th>Parent</th><th>Email</th>
               </tr>
             </thead>
             <tbody></tbody>

@@ -11,14 +11,16 @@ extracurricular robotics club. Plain HTML/CSS/JS, hosted on GitHub Pages, backed
 index.html          Landing page
 about.html           About / team / roles page
 join.html            Mailing-list subscribe + full family/roster sign-up
+updates.html         Public team-communications archive, newest first
 unsubscribe.html     Landing page for unsubscribe email links (?token=...)
-admin.html           Password-gated subscriber list + CSV export (unlisted, not in nav)
+admin.html           Password-gated subscriber list, CSV export, communications posting (unlisted, not in nav)
 css/style.css        Shared styles (navy #1b2a4a + gold/amber theme)
-js/config.js         SCRIPT_URL + shared constants (roles, grades, shirt sizes, mailing-list segments)
+js/config.js         SCRIPT_URL/SITE_URL + shared constants (roles, grades, shirt sizes, mailing-list segments)
 js/subscribe.js      Quick mailing-list subscribe form logic
 js/family-form.js    Full family/roster sign-up form logic
 js/unsubscribe.js    Unsubscribe page logic
-js/admin.js          Admin login + subscriber table + CSV export
+js/updates.js        Fetches + renders published communications on updates.html
+js/admin.js          Admin login + subscriber table + CSV export + communications posting/review
 apps-script/Code.gs  Backend source (copy into the Apps Script project — see below)
 ```
 
@@ -50,6 +52,10 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
   (`subscribed` / `unsubscribed`), source, timestamps, and a `Lists` column (comma-separated segment
   codes — see `LIST_OPTIONS` in [js/config.js](js/config.js): `elementary`, `middle`, `high`,
   `lightweight`). Created automatically on first subscribe.
+- **Communications** — team update posts: ID, timestamps, title, body (HTML), a plain-text summary
+  (used for the announcement email), and status (`draft` / `published`). Drafts are written from
+  admin.html; only Claude flips a draft to `published` (after reviewing/reformatting it), which is
+  what makes it appear on [updates.html](updates.html).
 
 ### Endpoints (all on the one deployed web app URL)
 
@@ -59,6 +65,11 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Subscribe | POST | `{ action: 'subscribe', name, email, lists, source }` | Upserts Subscriber row, generates/reuses a token, sends confirmation email with unsubscribe link |
 | Unsubscribe | GET | `?action=unsubscribe&token=...` | Marks the matching Subscriber row `unsubscribed` |
 | Admin list | GET | `?action=list&password=...` | Returns all Subscriber rows as JSON if password matches `ADMIN_PASSWORD` |
+| Post communication | POST | `{ action: 'postCommunication', password, title, body }` | Appends a Communications row with status `draft` |
+| Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status? }` | Claude-facing: overwrites only the fields given; `status: 'published'` also stamps Published At |
+| Published communications | GET | `?action=publishedCommunications` | Public, no password — only `published` rows, newest first. Powers updates.html |
+| Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published), for admin.html's review lists |
+| Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |
 
 ## Admin page
 
@@ -66,6 +77,10 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 is gated by a shared password checked server-side against the `ADMIN_PASSWORD` Script Property (not
 committed to this repo). This is a low-stakes convenience gate, not strong security: the password is
 sent as a URL query parameter, so avoid reusing a password used elsewhere.
+
+Besides the subscriber list/export, admin.html also holds: quick links out to the join-page QR
+scan card and updates.html; a communications draft form + review lists (see Communications above);
+and the team roster with a shirt-size tally + CSV export, pulled straight from Parent Submissions.
 
 ## Local development
 

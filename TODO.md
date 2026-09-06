@@ -50,16 +50,40 @@ Nothing here is implemented yet — this is planning only.
       classes, not the extracurricular club). Will likely pull content from the CTE repo's `8AER`,
       `HSAER`, and `Design and Build Lab` folders — design/layout still to be worked out later.
 
-## Season update page
+## Team communications ✅ built — needs redeploy
 
-- [ ] **Build a public "season update" page** on the site — current build season status, event
-      results, next milestones. This becomes the single source of truth other things pull from.
-- [ ] **Quarterly digest pulls from that page.** The "lightweight" list's quarterly email should be
-      a summary of whatever's on the season update page at send time — write it once as content,
-      reuse it for the page *and* the email, not two separate write-ups.
-- [ ] **Reminder to keep it fresh.** Needs a recurring nudge (e.g. a scheduled reminder — Claude's
-      `/schedule` skill can do this once the page exists) so the season page doesn't go stale
-      between quarterly sends.
+Supersedes the old "season update page" idea — built as an ongoing archive instead of one static
+page, with an email loop attached.
+
+- [x] **Public archive page.** [updates.html](updates.html) — every published communication, newest
+      first, fetched live from the Communications sheet (no rebuild/redeploy needed per post).
+- [x] **Admin draft + review flow.** [admin.html](admin.html) — paste raw notes into "Team
+      communications," saved as a `draft` row. Nothing is public yet. Ask Claude to review/reformat
+      a draft to match the site's `.comm-*` styles ([css/style.css](css/style.css)) and publish it —
+      that's the "conform to page format standards" step, intentionally not a one-click bypass in
+      the UI.
+- [x] **Backend.** [apps-script/Code.gs](apps-script/Code.gs) — new `Communications` sheet;
+      `postCommunication` (draft), `updateCommunication` (Claude-facing refine+publish),
+      `publishedCommunications` (public, powers updates.html), `communicationsAdmin` (password-gated,
+      powers the admin review lists). Bumped to v2.3.0.
+- [x] **Announcement email.** Each published post gets a "Compose announcement →" button in
+      admin.html — builds a `mailto:` with a bullet-point summary + a deep link to that post
+      (`updates.html#c-<id>`), Bcc'd to subscribed emails **excluding lightweight-only** subscribers
+      (they get the quarterly digest instead; anyone on a team list too still gets it).
+- [x] **Redeploy required.** Done — `apps-script/Code.gs` v2.3.0 redeployed live.
+- [x] **First post live:** "Season Kickoff — Soft-Start Schedule" is published on
+      [updates.html](updates.html). Still needs its announcement email sent from admin.html
+      ("Compose announcement →") whenever you're ready.
+- [ ] **Quarterly lightweight digest** still needs its own thing — a periodic rollup of recent
+      communications, sent only to lightweight subscribers. Not built yet; the per-post announcement
+      above intentionally excludes them.
+
+## Admin page extras ✅ built — needs redeploy
+
+- [x] **Quick links.** admin.html now links out to the join-page QR scan card and updates.html.
+- [x] **Team roster & shirt sizes.** New "Roster admin" section — table of every child (name, grade,
+      shirt size, parent, email) pulled straight from Parent Submissions, a size tally for ordering,
+      and a CSV export. Backend: `rosterAdmin` action in Code.gs.
 
 ## Keeping the list current (process, not code)
 

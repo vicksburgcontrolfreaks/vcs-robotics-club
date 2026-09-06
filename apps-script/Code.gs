@@ -12,10 +12,13 @@
 // Sheets used (auto-created on first use):
 //   "Parent Submissions" — one row per child, from the full family sign-up form (unchanged from before).
 //   "Subscribers"         — one row per mailing-list contact, with a token used for unsubscribe links.
+//   "Communications"      — team update posts. Drafted from admin.html, then reviewed/formatted and
+//                           published by Claude before they're ever public — see updates.html.
 
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
-const BACKEND_VERSION = '2.1.0';
+const COMMUNICATIONS_SHEET = 'Communications';
+const BACKEND_VERSION = '2.3.0';
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 const CLUB_NAME = 'VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)';
 
@@ -26,6 +29,9 @@ function doGet(e) {
   try {
     if (params.action === 'unsubscribe') return handleUnsubscribe(params);
     if (params.action === 'list') return handleList(params);
+    if (params.action === 'publishedCommunications') return handlePublishedCommunications();
+    if (params.action === 'communicationsAdmin') return handleCommunicationsAdmin(params);
+    if (params.action === 'rosterAdmin') return handleRosterAdmin(params);
     return jsonOut({ status: 'ok', version: BACKEND_VERSION });
   } catch (err) {
     return jsonOut({ status: 'error', message: err.message });
@@ -38,6 +44,14 @@ function doPost(e) {
 
     if (data.action === 'subscribe') {
       return handleSubscribe(data);
+    }
+
+    if (data.action === 'postCommunication') {
+      return handlePostCommunication(data);
+    }
+
+    if (data.action === 'updateCommunication') {
+      return handleUpdateCommunication(data);
     }
 
     // Legacy / family sign-up path — same shape parent_form.html has always sent.
@@ -241,6 +255,153 @@ function handleList(params) {
     });
   }
   return jsonOut({ status: 'ok', subscribers: rows });
+}
+
+// ── Team communications ───────────────────────────────────────────────────────
+// Flow: teacher pastes raw notes into admin.html → saved here as a 'draft' row.
+// Nothing is public yet. Claude reviews/reformats the draft to match the site's
+// styling, then calls updateCommunication to set the cleaned-up body + a short
+// plain-text summary and flip status to 'published' — only then does it show
+// up on updates.html or become eligible for the "Compose announcement" email.
+
+function handlePostCommunication(data) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || data.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const title = (data.title || '').trim();
+  const body = (data.body || '').trim();
+  if (!title || !body) {
+    return jsonOut({ status: 'error', message: 'Title and content are both required.' });
+  }
+
+  const sheet = getOrCreateCommunicationsSheet();
+  const id = Utilities.getUuid();
+  const now = new Date().toISOString();
+  sheet.appendRow([id, now, title, body, '', 'draft', '']);
+  return jsonOut({ status: 'ok', id: id });
+}
+
+// Claude-facing: overwrite a draft's title/body/summary and/or flip its status.
+// Only fields present in `data` are touched, so a status-only call (publish)
+// doesn't require re-sending title/body.
+function handleUpdateCommunication(data) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || data.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const id = data.id;
+  if (!id) return jsonOut({ status: 'error', message: 'Missing communication ID.' });
+
+  const sheet = getOrCreateCommunicationsSheet();
+  const values = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(id)) {
+      const rowNum = i + 1;
+      if (data.title   !== undefined) sheet.getRange(rowNum, 3).setValue(data.title);
+      if (data.body    !== undefined) sheet.getRange(rowNum, 4).setValue(data.body);
+      if (data.summary !== undefined) sheet.getRange(rowNum, 5).setValue(data.summary);
+      if (data.status  !== undefined) {
+        sheet.getRange(rowNum, 6).setValue(data.status);
+        if (data.status === 'published') {
+          sheet.getRange(rowNum, 7).setValue(new Date().toISOString());
+        }
+      }
+      return jsonOut({ status: 'ok' });
+    }
+  }
+
+  return jsonOut({ status: 'error', message: 'Communication not found.' });
+}
+
+// Public — no password. Only published posts, newest first. Powers updates.html.
+function handlePublishedCommunications() {
+  const sheet = getOrCreateCommunicationsSheet();
+  const values = sheet.getDataRange().getValues();
+  const rows = [];
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][5] !== 'published') continue;
+    rows.push({
+      id: values[i][0],
+      title: values[i][2],
+      body: values[i][3],
+      publishedAt: values[i][6] || values[i][1]
+    });
+  }
+  rows.sort(function (a, b) { return new Date(b.publishedAt) - new Date(a.publishedAt); });
+  return jsonOut({ status: 'ok', communications: rows });
+}
+
+// Password-gated — every draft and published row, for admin.html's review lists.
+function handleCommunicationsAdmin(params) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || params.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const sheet = getOrCreateCommunicationsSheet();
+  const values = sheet.getDataRange().getValues();
+  const rows = [];
+  for (let i = 1; i < values.length; i++) {
+    rows.push({
+      id: values[i][0],
+      createdAt: values[i][1],
+      title: values[i][2],
+      body: values[i][3],
+      summary: values[i][4],
+      status: values[i][5],
+      publishedAt: values[i][6]
+    });
+  }
+  rows.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+  return jsonOut({ status: 'ok', communications: rows });
+}
+
+function getOrCreateCommunicationsSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(COMMUNICATIONS_SHEET);
+  if (!sheet) {
+    sheet = ss.insertSheet(COMMUNICATIONS_SHEET);
+    sheet.appendRow([
+      'ID', 'Created At', 'Title', 'Body', 'Summary', 'Status', 'Published At'
+    ]);
+    sheet.setFrozenRows(1);
+    sheet.setColumnWidth(1, 220); // id
+    sheet.setColumnWidth(4, 400); // body
+    sheet.setColumnWidth(5, 300); // summary
+  }
+  return sheet;
+}
+
+// ── Admin: roster / t-shirt sizes ─────────────────────────────────────────────
+// Reads Parent Submissions directly — already one row per child, so this is
+// naturally one row per shirt needed. Powers admin.html's roster/shirt list.
+
+function handleRosterAdmin(params) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || params.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const sheet = getOrCreateSubmissionsSheet();
+  const values = sheet.getDataRange().getValues();
+  const rows = [];
+  for (let i = 1; i < values.length; i++) {
+    rows.push({
+      submittedAt: values[i][0],
+      parentName:  [values[i][1], values[i][2]].filter(Boolean).join(' '),
+      email:       values[i][3],
+      phone:       values[i][4],
+      childName:   values[i][6],
+      grade:       values[i][7],
+      shirtSize:   values[i][8],
+      roles:       values[i][9]
+    });
+  }
+  return jsonOut({ status: 'ok', roster: rows });
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
