@@ -1,4 +1,4 @@
-// VCS Robotics — Parent Form + Club Mailing List Backend
+// Vicksburg Robotics — Parent Form + Club Mailing List Backend
 // Deploy as: Web app → Execute as: Me → Who has access: Anyone
 // Deployment URL goes into: cte/8126/parent_form.html (SCRIPT_URL) AND
 //                            vcs-robotics-club/js/config.js (SCRIPT_URL) — same deployment, both sites hit it.
@@ -25,7 +25,7 @@ const BACKEND_VERSION = '2.4.0';
 // every Communication is tagged with exactly one of these.
 const COMM_AUDIENCE_CODES = ['elementary', 'middle', 'high', 'lightweight'];
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
-const CLUB_NAME = 'VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)';
+const CLUB_NAME = 'Vicksburg Robotics (Control Freaks)';
 
 // ── Entry points ──────────────────────────────────────────────────────────
 
@@ -207,7 +207,7 @@ function sendConfirmationEmail(name, email, token) {
     "We'll use this list to send occasional updates about meetings, competitions, and community events.\n\n" +
     "If you didn't request this, or ever want off the list, click below — no need to contact anyone:\n" +
     unsubscribeUrl + '\n\n' +
-    '— VCS Robotics';
+    '— Vicksburg Robotics';
 
   MailApp.sendEmail(email, subject, body);
 }

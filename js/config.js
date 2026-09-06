@@ -1,4 +1,4 @@
-// VCS Robotics Club — shared site config
+// Vicksburg Robotics — shared site config
 // Paste your deployed Apps Script web app URL here (same project as apps-script/Code.gs).
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSId_xJpoV06JIPtKC23HvK3F9pmZm417ZRcAo8PJUJeYNsWWXr1J2MXxgPmsquL5W/exec';
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
@@ -30,7 +30,7 @@ function listOptionsHtml(namePrefix) {
   }).join('');
 }
 
-// The four programs VCS Robotics communicates to. `value` codes intentionally
+// The four programs Vicksburg Robotics communicates to. `value` codes intentionally
 // match LIST_OPTIONS above (elementary/middle/high/lightweight) — a
 // communication's audience and a subscriber's list preference are the same
 // vocabulary, so "Compose announcement" can match one to the other directly.

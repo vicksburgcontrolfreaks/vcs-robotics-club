@@ -177,15 +177,37 @@
   // past a safe length and point to the copy-to-clipboard fallback instead.
   const MAILTO_SAFE_LENGTH = 1800;
 
+  // Clicking a mailto: link with no default mail app registered fails
+  // completely silently in most browsers — no error, no dialog, nothing
+  // visibly happens. There's no way for JS to detect whether it worked, so:
+  // trigger it via a real <a> click (more reliable than location.href), copy
+  // the recipient list to the clipboard regardless, and always show the full
+  // subject/body so there's a manual path forward either way.
+  function triggerMailto(mailto, emails, subjectText, bodyText) {
+    const a = document.createElement('a');
+    a.href = mailto;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    navigator.clipboard.writeText(emails.join(', ')).catch(() => {});
+
+    alert(
+      "If your email app didn't just open, your browser has no default mail handler set.\n\n" +
+      'The recipient list (' + emails.length + ' emails) has been copied to your clipboard — ' +
+      'compose a new email yourself, paste it into Bcc, and use this subject/body:\n\n' +
+      'Subject: ' + subjectText + (bodyText ? '\n\n' + bodyText : '')
+    );
+  }
+
   document.getElementById('composeBtn').addEventListener('click', () => {
     const emails = subscribedEmails();
     if (emails.length === 0) {
       alert('No subscribed emails match the current filter.');
       return;
     }
-    const subject = encodeURIComponent('VCS Robotics — ' + currentFilterLabel() + ' update');
-    const bcc = encodeURIComponent(emails.join(','));
-    const mailto = 'mailto:?bcc=' + bcc + '&subject=' + subject;
+    const subjectText = 'Vicksburg Robotics — ' + currentFilterLabel() + ' update';
+    const mailto = 'mailto:?bcc=' + encodeURIComponent(emails.join(',')) + '&subject=' + encodeURIComponent(subjectText);
 
     if (mailto.length > MAILTO_SAFE_LENGTH) {
       alert(
@@ -194,7 +216,7 @@
       );
       return;
     }
-    window.location.href = mailto;
+    triggerMailto(mailto, emails, subjectText, null);
   });
 
   document.getElementById('copyBccBtn').addEventListener('click', async () => {
@@ -248,7 +270,7 @@
       .concat(bulletLines.map(b => '• ' + b))
       .concat(['', 'Read the full post: ' + link])
       .join('\n');
-    const subject = 'VCS Robotics — ' + comm.title;
+    const subject = 'Vicksburg Robotics — ' + comm.title;
 
     const mailto = 'mailto:?bcc=' + encodeURIComponent(emails.join(','))
       + '&subject=' + encodeURIComponent(subject)
@@ -262,7 +284,7 @@
       );
       return;
     }
-    window.location.href = mailto;
+    triggerMailto(mailto, emails, subject, body);
   }
 
   function renderCommunications() {

@@ -76,22 +76,40 @@ with an email loop attached.
       `lightweight` subscribers.
 - [ ] **Redeploy required.** This changed `apps-script/Code.gs` again (Audience column/validation) —
       same steps as before, paste in and redeploy a new version.
-- [ ] **Existing post needs retagging:** "Season Kickoff — Soft-Start Schedule" was published before
-      the Audience column existed — needs `audience: 'middle'` set, and its body's "FRC Team 8126"
-      reference corrected to "FTC Teams 5618 & 6494" (it's a Middle School post). Waiting on the
-      redeploy above before this can be sent via the API.
+- [x] **Existing post retagged.** "Season Kickoff — Soft-Start Schedule" is `audience: 'middle'`,
+      body corrected to "FTC Teams 5618 & 6494," SignUpGenius link added to the tailgate sign-up, and
+      main dish corrected to hamburgers — all live via direct API calls.
 - [ ] **Quarterly lightweight digest** still needs its own thing — a periodic rollup of recent
       communications across all programs, sent only to Sponsors (`lightweight`) subscribers.
 
-## Umbrella-program branding (flagged, not started)
+## Umbrella-program rebrand ✅ built — needs redeploy
 
-Learned while building the four communication pages: **FRC Team 8126 is specifically the High
-School team** — VCS Robotics is actually the umbrella over four programs (Elementary, Middle School
-[FTC 5618 & 6494], High School [FRC 8126], Sponsors). The site currently brands itself site-wide as
-"VCS Robotics (FRC Team 8126 — Vicksburg Control Freaks)" in the header, footer, and About page —
-worth revisiting whether the homepage/header should present as the umbrella program instead of
-reading as FRC-8126-specific, now that Elementary/Middle School have their own identity on the site
-too. Not touched yet — flagging for a deliberate decision, not a drive-by rename.
+Resolves the branding question flagged above: site-wide chrome (header brand name/logo, footer,
+page titles) no longer reads as FRC-8126-specific.
+
+- [x] **Site title.** "VCS Robotics" → "Vicksburg Robotics" everywhere — header, footer, page
+      `<title>`s, meta descriptions, the Apps Script `CLUB_NAME`/confirmation email, unsubscribe
+      confirmation text, admin email subject lines.
+- [x] **Subtitle simplified.** Header used to read "FRC Team 8126 · Control Freaks"; now just
+      **Control Freaks**, larger and bold. Content paragraphs that specifically describe the High
+      School team (About page, homepage lead, `updates-high.html`) still correctly say "FRC Team
+      8126" — only the shared site-wide chrome dropped it.
+- [x] **Logo added to every header.** `img/control-freaks-logo.png`, next to the brand name/subtitle
+      on all 10 pages.
+- [x] **New palette: red/white primary, black/grey secondary** — pulled from the logo. Rewrote
+      [css/style.css](css/style.css) tokens (`--red`/`--red-dark`/`--black`/`--black-light` replacing
+      `--navy`/`--gold`); `.btn-gold`/`.btn-navy` class *names* are unchanged (would've meant touching
+      every page) but now render red/black respectively.
+- [ ] **Redeploy required.** Touched `apps-script/Code.gs` (CLUB_NAME, confirmation email footer) —
+      same steps as before.
+- [ ] **QR scan card still on the old palette.** The join-page QR artifact
+      (https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858) is navy/gold from before
+      this rebrand — worth regenerating to match, whenever convenient.
+- [ ] **Homepage/About framing still HS-centric.** Intentionally left alone this round: the
+      homepage's hero paragraph and About page still describe the club as "home of FRC Team 8126" —
+      now that Elementary/Middle School have their own pages, that framing could be revisited to
+      present the club as the four-program umbrella from the front door. Separate decision from the
+      chrome rename above.
 
 ## Admin page extras ✅ built — needs redeploy
 

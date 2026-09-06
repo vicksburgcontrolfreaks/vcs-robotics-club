@@ -1,8 +1,8 @@
-# VCS Robotics Club Website
+# Vicksburg Robotics Website
 
-Public site for VCS Robotics, Vicksburg Community Schools' extracurricular robotics program — four
-teams under one umbrella: Elementary Robotics, Middle School Robotics (FTC 5618 & 6494), High School
-Robotics (FRC 8126, the Vicksburg Control Freaks), and a Sponsors/community list. Plain HTML/CSS/JS,
+Public site for Vicksburg Robotics (Control Freaks), Vicksburg Community Schools' extracurricular
+robotics program — four teams under one umbrella: Elementary Robotics, Middle School Robotics
+(FTC 5618 & 6494), High School Robotics (FRC 8126), and a Sponsors/community list. Plain HTML/CSS/JS,
 hosted on GitHub Pages, backed by Google Apps Script.
 
 **Live site:** https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/
@@ -20,7 +20,8 @@ updates-high.html         Public archive, High School Robotics (FRC 8126) only
 updates-sponsors.html     Public archive, Sponsors (quarterly) only
 unsubscribe.html     Landing page for unsubscribe email links (?token=...)
 admin.html           Password-gated subscriber list, CSV export, communications posting (unlisted, not in nav)
-css/style.css        Shared styles (navy #1b2a4a + gold/amber theme)
+img/control-freaks-logo.png  Team logo, used in every page's header
+css/style.css        Shared styles (red/white primary, black/grey secondary — from the team logo)
 js/config.js         SCRIPT_URL/SITE_URL + shared constants (roles, grades, shirt sizes, mailing-list
                      segments, COMM_AUDIENCES — the four programs)
 js/subscribe.js      Quick mailing-list subscribe form logic
@@ -106,7 +107,7 @@ Repo Settings → Pages → Source: Deploy from branch → `main` / `/ (root)`.
 
 ## Resources
 
-- **Join-page QR code ("Control Freaks Scan Card")** — printable QR linking to `join.html`,
-  navy/gold themed, with a print-flyer button:
-  https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858
+- **Join-page QR code ("Control Freaks Scan Card")** — printable QR linking to `join.html`, with a
+  print-flyer button: https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858
+  (still navy/gold themed from before the red/black/white rebrand — see TODO.md)
 - **Backlog** — see [TODO.md](TODO.md) for planned form/mailing-list changes.
