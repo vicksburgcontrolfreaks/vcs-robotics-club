@@ -164,6 +164,10 @@ p { margin: 0 0 14px; color: var(--text); }
   padding: 20px;
 }
 
+.card-link { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.card-link:hover { border-color: var(--navy-light); box-shadow: 0 2px 8px rgba(27,42,74,0.08); }
+@media (prefers-reduced-motion: reduce) { .card-link { transition: none; } }
+
 .card h2, .card h3 {
   font-size: 15px;
   text-transform: uppercase;

@@ -1,6 +1,8 @@
-// Public "Updates" page — fetches published team communications and renders
-// them newest-first. No admin password: only status=published rows ever come
-// back from this endpoint (see handlePublishedCommunications in Code.gs).
+// Public per-program "Updates" pages (updates-elementary/middle/high/sponsors.html)
+// — fetches published communications for whichever program set PAGE_AUDIENCE
+// (see the inline <script> near the bottom of each page) and renders them
+// newest-first. No admin password: only status=published rows ever come back
+// from this endpoint (see handlePublishedCommunications in Code.gs).
 (function () {
   function fmtDate(v) {
     if (!v) return '';
@@ -11,7 +13,8 @@
   async function load() {
     const listEl = document.getElementById('commList');
     try {
-      const res = await fetch(SCRIPT_URL + '?action=publishedCommunications');
+      const url = SCRIPT_URL + '?action=publishedCommunications&audience=' + encodeURIComponent(PAGE_AUDIENCE);
+      const res = await fetch(url);
       const result = await res.json();
 
       if (result.status !== 'ok' || !result.communications || result.communications.length === 0) {

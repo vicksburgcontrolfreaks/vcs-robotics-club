@@ -17,6 +17,20 @@
     listFilterEl.appendChild(opt);
   });
 
+  const COMM_AUDIENCE_BY_CODE = COMM_AUDIENCES.reduce((map, a) => {
+    map[a.value] = a;
+    return map;
+  }, {});
+
+  // Populate the "which program is this post for" dropdown.
+  const commAudienceEl = document.getElementById('comm-audience');
+  COMM_AUDIENCES.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.value;
+    opt.textContent = a.label;
+    commAudienceEl.appendChild(opt);
+  });
+
   function fmtDate(v) {
     if (!v) return '';
     const d = new Date(v);
@@ -52,14 +66,14 @@
     return val ? (LIST_LABELS[val] || val) : 'All Subscribers';
   }
 
-  // Audience for a routine "new communication posted" email: subscribed, and
-  // on at least one non-lightweight list. Someone who checked ONLY
-  // "lightweight" opted out of routine mail — they get the quarterly digest
-  // instead. Ignores the table's list filter above (that's for the manual
-  // Compose/CSV tools); this is always the full routine audience.
-  function routineAnnouncementEmails() {
+  // Subscribed emails for one specific program's list (elementary/middle/
+  // high/lightweight) — used to announce a communication only to the people
+  // who actually opted into that program. Ignores the table's list filter
+  // above (that's for the manual Compose/CSV tools); this always targets the
+  // post's own audience.
+  function emailsForAudience(code) {
     return currentRows
-      .filter(r => r.status === 'subscribed' && listCodes(r).some(code => code !== 'lightweight'))
+      .filter(r => r.status === 'subscribed' && listCodes(r).includes(code))
       .map(r => (r.email || '').trim())
       .filter(Boolean);
   }
@@ -220,13 +234,15 @@
   }
 
   function composeAnnouncement(comm) {
-    const emails = routineAnnouncementEmails();
+    const audience = COMM_AUDIENCE_BY_CODE[comm.audience];
+    const emails = emailsForAudience(comm.audience);
     if (emails.length === 0) {
-      alert('No subscribed emails to announce to (lightweight-only subscribers are excluded).');
+      alert('No subscribed emails for ' + (audience ? audience.label : comm.audience) + ' yet.');
       return;
     }
 
-    const link = SITE_URL + 'updates.html#c-' + comm.id;
+    const page = audience ? audience.page : 'updates.html';
+    const link = SITE_URL + page + '#c-' + comm.id;
     const bulletLines = String(comm.summary || '').split('\n').map(s => s.trim()).filter(Boolean);
     const body = ['New team communication posted: ' + comm.title, '']
       .concat(bulletLines.map(b => '• ' + b))
@@ -253,6 +269,8 @@
     const drafts = currentCommunications.filter(c => c.status !== 'published');
     const published = currentCommunications.filter(c => c.status === 'published');
 
+    const audienceLabel = code => (COMM_AUDIENCE_BY_CODE[code] || {}).label || code || '(no program set)';
+
     const draftsEl = document.getElementById('commDrafts');
     draftsEl.innerHTML = drafts.length === 0
       ? '<p class="muted">No drafts waiting.</p>'
@@ -263,7 +281,7 @@
             <div class="card" style="margin-bottom:10px;">
               <strong>${c.title || '(untitled)'}</strong>
               <div class="muted" style="font-size:12px; margin:2px 0 8px;">
-                Saved ${fmtDate(c.createdAt)} · pending Claude's review before it publishes
+                ${audienceLabel(c.audience)} · saved ${fmtDate(c.createdAt)} · pending Claude's review before it publishes
               </div>
               <div style="font-size:13px; color:var(--muted); white-space:pre-wrap;">${preview}${truncated ? '…' : ''}</div>
             </div>
@@ -277,7 +295,7 @@
           <div class="card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
             <div>
               <strong>${c.title || ''}</strong>
-              <div class="muted" style="font-size:12px;">Published ${fmtDate(c.publishedAt)}</div>
+              <div class="muted" style="font-size:12px;">${audienceLabel(c.audience)} · published ${fmtDate(c.publishedAt)}</div>
             </div>
             <button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
           </div>
@@ -298,8 +316,14 @@
     errorEl.style.display = 'none';
     infoEl.style.display = 'none';
 
+    const audience = commAudienceEl.value;
     const title = document.getElementById('comm-title').value.trim();
     const body = document.getElementById('comm-body').value.trim();
+    if (!audience) {
+      errorEl.textContent = 'Please choose which program this is for.';
+      errorEl.style.display = 'block';
+      return;
+    }
     if (!title || !body) {
       errorEl.textContent = 'Title and content are both required.';
       errorEl.style.display = 'block';
@@ -313,11 +337,12 @@
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'postCommunication', password: currentPassword, title, body })
+        body: JSON.stringify({ action: 'postCommunication', password: currentPassword, title, body, audience })
       });
       const result = await res.json();
       if (result.status !== 'ok') throw new Error(result.message || 'Server error');
 
+      commAudienceEl.value = '';
       document.getElementById('comm-title').value = '';
       document.getElementById('comm-body').value = '';
       infoEl.textContent = 'Draft saved — ask Claude to review and publish it.';

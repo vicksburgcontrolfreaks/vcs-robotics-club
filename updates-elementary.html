@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Updates — VCS Robotics</title>
-<meta name="description" content="Season updates, meeting schedules, and announcements from VCS Robotics — pick your program.">
+<title>Elementary Robotics Updates — VCS Robotics</title>
+<meta name="description" content="Season updates and announcements for VCS Robotics' Elementary Robotics program.">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -28,14 +28,11 @@
 
 <main>
   <section class="section">
-    <div class="wrap">
-      <p class="eyebrow">Team communications</p>
-      <h1 style="margin-bottom:6px;">Updates</h1>
-      <p class="muted" style="max-width:640px; margin-bottom:24px;">
-        VCS Robotics runs four programs — pick yours for its own meeting schedules and
-        announcements. On the mailing list? You'll get an email whenever a new one goes up.
-      </p>
-      <div class="grid" id="programGrid"></div>
+    <div class="wrap" style="max-width:720px;">
+      <p class="eyebrow"><a href="updates.html">Team communications</a> · Elementary Robotics</p>
+      <h1 style="margin-bottom:2px;">Elementary Robotics</h1>
+      <p class="muted" style="margin-bottom:24px;">Team numbers coming soon.</p>
+      <div id="commList"><p class="muted">Loading…</p></div>
     </div>
   </section>
 </main>
@@ -48,13 +45,7 @@
 </footer>
 
 <script src="js/config.js"></script>
-<script>
-  document.getElementById('programGrid').innerHTML = COMM_AUDIENCES.map(a => `
-    <a class="card card-link" href="${a.page}" style="text-decoration:none;">
-      <h3 style="margin-bottom:4px;">${a.label}</h3>
-      <p class="muted" style="margin:0; font-size:13.5px;">${a.teamLine}</p>
-    </a>
-  `).join('');
-</script>
+<script>const PAGE_AUDIENCE = 'elementary';</script>
+<script src="js/updates.js"></script>
 </body>
 </html>
