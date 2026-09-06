@@ -108,7 +108,13 @@ with an email loop attached.
       reproduces QR path data itself). Also returns a `summary` for the announcement email and a
       `notes` field for anything it couldn't confidently resolve. Never auto-saves or auto-publishes
       — the admin still reviews the result and clicks Publish. Bumped to v2.6.0.
-- [x] **`ANTHROPIC_API_KEY` Script Property added.** AI polish is live.
+- [x] **`ANTHROPIC_API_KEY` Script Property added.**
+- [ ] **Needs one-time script authorization.** Live test hit
+      `You do not have permission to call UrlFetchApp.fetch — Required permissions:
+      .../auth/script.external_request` — same class of gap as the earlier MailApp issue. Fix: in
+      the Apps Script editor, run any function once (▶), approve the "Connect to an external
+      service" permission when prompted, then redeploy a new version. Everything else (button,
+      error handling, clipboard fallback) already confirmed working correctly.
 
 ## Umbrella-program rebrand ✅ built — needs redeploy
 
