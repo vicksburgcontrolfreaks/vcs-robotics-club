@@ -308,3 +308,13 @@ table th { color: var(--black); font-size: 12px; text-transform: uppercase; lett
 }
 .comm-alert-title { font-weight: bold; color: var(--red-dark); margin-bottom: 6px; }
 .comm-alert p { margin: 0; font-size: 13.5px; color: var(--text); }
+
+/* Self-hosted QR embed — for posts that need to point readers at a page on
+   this site (e.g. the mailing-list sign-up) without depending on an external
+   link that might not be public. */
+.comm-qr { text-align: center; margin: 20px 0; }
+.comm-qr svg {
+  display: block; width: 140px; height: 140px; margin: 0 auto 8px;
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: #fff;
+}
+.comm-qr p { font-size: 13px; color: var(--muted); margin: 0; }
