@@ -109,12 +109,14 @@ with an email loop attached.
       `notes` field for anything it couldn't confidently resolve. Never auto-saves or auto-publishes
       — the admin still reviews the result and clicks Publish. Bumped to v2.6.0.
 - [x] **`ANTHROPIC_API_KEY` Script Property added.**
-- [ ] **Needs one-time script authorization.** Live test hit
-      `You do not have permission to call UrlFetchApp.fetch — Required permissions:
-      .../auth/script.external_request` — same class of gap as the earlier MailApp issue. Fix: in
-      the Apps Script editor, run any function once (▶), approve the "Connect to an external
-      service" permission when prompted, then redeploy a new version. Everything else (button,
-      error handling, clipboard fallback) already confirmed working correctly.
+- [x] **Script authorized for external requests.** Added `authorizeExternalRequests()` as a
+      dedicated one-time setup helper (running `handlePolishCommunication` directly doesn't trigger
+      the permission prompt — it throws on the missing `data` arg before ever reaching
+      `UrlFetchApp.fetch`). Re-tested live end to end: polish correctly tightened wording, resolved
+      "share the QR code for subscribing" into a real embedded QR (not the literal sentence), left
+      "share this link to our Discord" as a plain link rather than converting it to a QR too (a
+      distinction it drew on its own, not something explicitly spelled out), and produced a clean
+      announcement-email summary. Fully working.
 
 ## Umbrella-program rebrand ✅ built — needs redeploy
 
