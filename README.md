@@ -102,6 +102,13 @@ is gated by a shared password checked server-side against the `ADMIN_PASSWORD` S
 committed to this repo). This is a low-stakes convenience gate, not strong security: the password is
 sent as a URL query parameter, so avoid reusing a password used elsewhere.
 
+Once logged in, a left-side nav (`.admin-layout`/`.admin-side-nav` in css/style.css) jumps between
+Subscribers/New Draft/Drafts/Published/Roster & Shirt Sizes — sticky on desktop, a wrapping row
+above the content on narrow screens. Note: switching to `flex-direction: column` at that breakpoint
+also swaps which axis `align-items` governs, so the mobile rule explicitly sets `align-items:
+stretch` there — omitting it lets `.admin-main` size to its widest child (the subscriber table)
+instead of the container, which blows out the whole page width silently.
+
 Besides the subscriber list/export, admin.html also holds: quick links out to the join-page QR
 scan card and updates.html; a communications draft form with an in-browser review/edit/publish
 flow (live preview, plain-text auto-formatted into paragraphs) and per-draft delete (see

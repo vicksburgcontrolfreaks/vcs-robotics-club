@@ -165,6 +165,14 @@ page titles) no longer reads as FRC-8126-specific.
 - [x] **Team roster & shirt sizes.** New "Roster admin" section — table of every child (name, grade,
       shirt size, parent, email) pulled straight from Parent Submissions, a size tally for ordering,
       and a CSV export. Backend: `rosterAdmin` action in Code.gs.
+- [x] **Left-side section nav.** Sticky sidebar (Subscribers/New Draft/Drafts/Published/Roster &
+      Shirt Sizes) once logged in — wraps into a horizontal row above the content below 760px.
+      Caught and fixed a real bug along the way: `flex-direction: column` at that breakpoint swaps
+      which axis `align-items: flex-start` governs, so without an explicit `align-items: stretch`
+      override there, `.admin-main` sized itself to the subscriber table's full content width
+      instead of the container — silently forcing horizontal scroll on the whole page. Verified with
+      Playwright (measured `document.documentElement.scrollWidth` against `innerWidth` at 480px
+      before and after) rather than trusting a visual screenshot alone.
 
 ## Keeping the list current (process, not code)
 

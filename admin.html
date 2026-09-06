@@ -23,7 +23,7 @@
 
 <main>
   <section class="section">
-    <div class="wrap">
+    <div class="wrap" style="max-width:1180px;">
       <h1>Admin Portal</h1>
       <p class="muted">Teacher/lead access only. This page is unlisted — do not share the link publicly.</p>
 
@@ -41,7 +41,16 @@
       </div>
 
       <div id="listWrap" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:20px 0;">
+      <div class="admin-layout">
+        <nav class="admin-side-nav" aria-label="Admin sections">
+          <a href="#section-subscribers">Subscribers</a>
+          <a href="#section-communications">New Draft</a>
+          <a href="#section-drafts">Drafts</a>
+          <a href="#section-published">Published</a>
+          <a href="#section-roster">Roster &amp; Shirt Sizes</a>
+        </nav>
+        <div class="admin-main">
+        <div id="section-subscribers" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:20px 0;">
           <div id="listSummary" class="muted"></div>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <select id="listFilter"><option value="">All lists</option></select>
@@ -65,7 +74,7 @@
           </table>
         </div>
 
-        <h2 style="margin-top:36px;">Team communications</h2>
+        <h2 id="section-communications" style="margin-top:36px;">Team communications</h2>
         <p class="muted" style="font-size:13px;">
           Paste raw notes below and save as a draft — nothing here goes live yet. Review it below,
           edit as needed, check the preview, then publish; only then does it appear on
@@ -83,7 +92,7 @@
           <button type="button" class="submit-btn" id="commSaveBtn">Save draft</button>
         </div>
 
-        <div style="margin-top:20px;">
+        <div id="section-drafts" style="margin-top:20px;">
           <h3 style="color:var(--black); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Drafts pending review</h3>
           <div id="commDrafts" class="muted">Loading…</div>
         </div>
@@ -121,7 +130,7 @@
           </div>
         </div>
 
-        <div style="margin-top:20px;">
+        <div id="section-published" style="margin-top:20px;">
           <h3 style="color:var(--black); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Published</h3>
           <p class="muted" style="font-size:12.5px; margin-top:-4px;">
             "Compose announcement" copies Bcc/Subject/Body to your clipboard — scoped to that
@@ -132,7 +141,7 @@
           <div id="commPublished" class="muted">Loading…</div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:36px 0 12px;">
+        <div id="section-roster" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:36px 0 12px;">
           <h2 style="margin:0;">Team roster &amp; shirt sizes</h2>
           <button type="button" class="btn btn-gold" id="rosterExportBtn">Download CSV</button>
         </div>
@@ -151,6 +160,8 @@
             <tbody></tbody>
           </table>
         </div>
+        </div>
+      </div>
       </div>
     </div>
   </section>
