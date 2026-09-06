@@ -396,6 +396,7 @@
     document.getElementById('edit-body').value = comm.body || '';
     document.getElementById('edit-summary').value = comm.summary || '';
     document.getElementById('editError').style.display = 'none';
+    document.getElementById('polishNotes').style.display = 'none';
     renderDraftPreview();
     const editor = document.getElementById('draftEditor');
     editor.style.display = 'block';
@@ -404,6 +405,51 @@
 
   ['edit-title', 'edit-body'].forEach(id => {
     document.getElementById(id).addEventListener('input', renderDraftPreview);
+  });
+
+  document.getElementById('polishBtn').addEventListener('click', async () => {
+    if (!editingCommId) return;
+    const errorEl = document.getElementById('editError');
+    const notesEl = document.getElementById('polishNotes');
+    errorEl.style.display = 'none';
+    notesEl.style.display = 'none';
+
+    const title = document.getElementById('edit-title').value.trim();
+    const body = document.getElementById('edit-body').value.trim();
+    const audience = document.getElementById('edit-audience').value;
+    if (!title || !body) {
+      errorEl.textContent = 'Add a title and body first, then polish.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('polishBtn');
+    btn.disabled = true;
+    btn.textContent = 'Polishing…';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'polishCommunication', password: currentPassword, title, body, audience })
+      });
+      const result = await res.json();
+      if (result.status !== 'ok') throw new Error(result.message || 'AI polish failed.');
+
+      document.getElementById('edit-body').value = result.body || body;
+      if (result.summary) document.getElementById('edit-summary').value = result.summary;
+      renderDraftPreview();
+
+      if (result.notes) {
+        notesEl.textContent = '✨ Needs your attention: ' + result.notes;
+        notesEl.style.display = 'block';
+      }
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✨ Polish with AI';
+    }
   });
 
   document.getElementById('cancelEditBtn').addEventListener('click', () => {
