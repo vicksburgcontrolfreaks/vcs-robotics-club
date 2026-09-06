@@ -385,6 +385,18 @@ const AUDIENCE_LABELS_FOR_AI = {
 // the reader, like "share the QR code here"), and returns polished HTML +
 // a plain-text summary for the announcement email. Never auto-publishes —
 // the admin still reviews the result and clicks Publish themselves.
+// One-time setup helper — run this manually (▶) from the Apps Script editor
+// once to trigger the "Connect to an external service" authorization prompt.
+// Calling handlePolishCommunication directly instead won't work for this:
+// it throws immediately on the missing `data` argument before ever reaching
+// UrlFetchApp.fetch, so Apps Script never detects the scope is needed and
+// never prompts for it. This function has no such dependency — it always
+// reaches the fetch call. The request itself is expected to fail (no API
+// key needed here) — only the permission prompt matters.
+function authorizeExternalRequests() {
+  UrlFetchApp.fetch('https://api.anthropic.com/v1/models', { muteHttpExceptions: true });
+}
+
 function handlePolishCommunication(data) {
   const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
   if (!expected || data.password !== expected) {
