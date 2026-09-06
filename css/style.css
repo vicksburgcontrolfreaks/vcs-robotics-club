@@ -189,17 +189,20 @@ label {
   margin: 12px 0 4px;
 }
 
-input[type=text], input[type=email], input[type=tel], input[type=password], select {
+input[type=text], input[type=email], input[type=tel], input[type=password], select, textarea {
   width: 100%;
   padding: 10px 12px;
   font-size: 15px;
+  font-family: inherit;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
   color: var(--text);
 }
 
-input:focus, select:focus { outline: 2px solid var(--navy-light); outline-offset: 1px; }
+textarea { resize: vertical; }
+
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--navy-light); outline-offset: 1px; }
 
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
@@ -271,3 +274,29 @@ table th { color: var(--navy); font-size: 12px; text-transform: uppercase; lette
 }
 .badge-subscribed { background: #e3f4e8; color: var(--success); }
 .badge-unsubscribed { background: #f6e2e0; color: var(--danger); }
+
+/* ── Team communications (updates.html) ───────────────────────*/
+.comm-card { margin-bottom: 24px; }
+.comm-date {
+  font-size: 12px; font-weight: bold; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+}
+.comm-day {
+  font-weight: bold; color: var(--navy); font-size: 15px;
+  margin: 20px 0 8px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.comm-card .comm-day:first-of-type { margin-top: 6px; padding-top: 0; border-top: none; }
+.comm-event {
+  background: #fafafa; border-left: 3px solid var(--border); border-radius: 6px;
+  padding: 12px 14px; margin-bottom: 10px;
+}
+.comm-event-time { font-weight: bold; font-size: 13px; color: var(--text); }
+.comm-event-title { color: var(--navy); font-weight: bold; margin: 2px 0 4px; }
+.comm-event p { margin: 0; font-size: 13.5px; color: var(--muted); }
+.comm-highlight { background: #fff8e6; border-left-color: var(--gold); }
+.comm-alert {
+  background: #fff8e6; border: 1.5px solid var(--gold); border-radius: 8px;
+  padding: 14px 16px; margin: 18px 0;
+}
+.comm-alert-title { font-weight: bold; color: var(--gold-dark); margin-bottom: 6px; }
+.comm-alert p { margin: 0; font-size: 13.5px; color: var(--text); }

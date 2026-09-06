@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unsubscribe — VCS Robotics</title>
+<title>Updates — VCS Robotics</title>
+<meta name="description" content="Season updates, meeting schedules, and announcements from VCS Robotics, FRC Team 8126.">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -19,7 +20,7 @@
     <nav class="site-nav">
       <a href="index.html">Home</a>
       <a href="about.html">About &amp; Team</a>
-      <a href="updates.html">Updates</a>
+      <a href="updates.html" class="active">Updates</a>
       <a href="join.html">Join / Sign Up</a>
     </nav>
   </div>
@@ -27,12 +28,14 @@
 
 <main>
   <section class="section">
-    <div class="narrow">
-      <div class="card" id="unsubCard">
-        <div class="confirm-screen" style="padding:20px;">
-          <p class="muted">Processing your request…</p>
-        </div>
-      </div>
+    <div class="wrap" style="max-width:720px;">
+      <p class="eyebrow">Team communications</p>
+      <h1 style="margin-bottom:6px;">Updates</h1>
+      <p class="muted" style="margin-bottom:24px;">
+        Meeting schedules and announcements from team leadership. On the mailing list?
+        You'll get an email whenever a new one goes up.
+      </p>
+      <div id="commList"><p class="muted">Loading…</p></div>
     </div>
   </section>
 </main>
@@ -45,6 +48,6 @@
 </footer>
 
 <script src="js/config.js"></script>
-<script src="js/unsubscribe.js"></script>
+<script src="js/updates.js"></script>
 </body>
 </html>

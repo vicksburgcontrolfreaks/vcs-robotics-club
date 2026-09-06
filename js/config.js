@@ -1,6 +1,7 @@
 // VCS Robotics Club — shared site config
 // Paste your deployed Apps Script web app URL here (same project as apps-script/Code.gs).
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSId_xJpoV06JIPtKC23HvK3F9pmZm417ZRcAo8PJUJeYNsWWXr1J2MXxgPmsquL5W/exec';
+const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 
 const ROLE_OPTIONS = [
   'Programmer',

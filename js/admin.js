@@ -52,6 +52,18 @@
     return val ? (LIST_LABELS[val] || val) : 'All Subscribers';
   }
 
+  // Audience for a routine "new communication posted" email: subscribed, and
+  // on at least one non-lightweight list. Someone who checked ONLY
+  // "lightweight" opted out of routine mail — they get the quarterly digest
+  // instead. Ignores the table's list filter above (that's for the manual
+  // Compose/CSV tools); this is always the full routine audience.
+  function routineAnnouncementEmails() {
+    return currentRows
+      .filter(r => r.status === 'subscribed' && listCodes(r).some(code => code !== 'lightweight'))
+      .map(r => (r.email || '').trim())
+      .filter(Boolean);
+  }
+
   async function fetchSubscribers(password) {
     const url = SCRIPT_URL + '?action=list&password=' + encodeURIComponent(password);
     const res = await fetch(url);
@@ -113,6 +125,8 @@
       document.getElementById('loginCard').style.display = 'none';
       document.getElementById('listWrap').style.display = 'block';
       renderFiltered();
+      loadCommunications();
+      loadRoster();
     } catch (err) {
       errorEl.textContent = err.message || 'Something went wrong.';
       errorEl.style.display = 'block';
@@ -134,6 +148,8 @@
       currentRows = result.subscribers || [];
       renderFiltered();
     }
+    loadCommunications();
+    loadRoster();
   });
 
   listFilterEl.addEventListener('change', renderFiltered);
@@ -183,5 +199,197 @@
     } finally {
       setTimeout(() => { btn.textContent = 'Copy Bcc list'; }, 2500);
     }
+  });
+
+  // ── Team communications ──────────────────────────────────────────────────
+  let currentCommunications = [];
+
+  async function fetchCommunications(password) {
+    const url = SCRIPT_URL + '?action=communicationsAdmin&password=' + encodeURIComponent(password);
+    const res = await fetch(url);
+    return res.json();
+  }
+
+  async function loadCommunications() {
+    if (!currentPassword) return;
+    const result = await fetchCommunications(currentPassword);
+    if (result.status === 'ok') {
+      currentCommunications = result.communications || [];
+      renderCommunications();
+    }
+  }
+
+  function composeAnnouncement(comm) {
+    const emails = routineAnnouncementEmails();
+    if (emails.length === 0) {
+      alert('No subscribed emails to announce to (lightweight-only subscribers are excluded).');
+      return;
+    }
+
+    const link = SITE_URL + 'updates.html#c-' + comm.id;
+    const bulletLines = String(comm.summary || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const body = ['New team communication posted: ' + comm.title, '']
+      .concat(bulletLines.map(b => '• ' + b))
+      .concat(['', 'Read the full post: ' + link])
+      .join('\n');
+    const subject = 'VCS Robotics — ' + comm.title;
+
+    const mailto = 'mailto:?bcc=' + encodeURIComponent(emails.join(','))
+      + '&subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+
+    if (mailto.length > MAILTO_SAFE_LENGTH) {
+      window.prompt(
+        'This composed email is too long for a mailto link. Use "Copy Bcc list" for the ' +
+        'recipients, then paste this body text into Gmail yourself:',
+        body
+      );
+      return;
+    }
+    window.location.href = mailto;
+  }
+
+  function renderCommunications() {
+    const drafts = currentCommunications.filter(c => c.status !== 'published');
+    const published = currentCommunications.filter(c => c.status === 'published');
+
+    const draftsEl = document.getElementById('commDrafts');
+    draftsEl.innerHTML = drafts.length === 0
+      ? '<p class="muted">No drafts waiting.</p>'
+      : drafts.map(c => {
+          const preview = String(c.body || '').slice(0, 200);
+          const truncated = String(c.body || '').length > 200;
+          return `
+            <div class="card" style="margin-bottom:10px;">
+              <strong>${c.title || '(untitled)'}</strong>
+              <div class="muted" style="font-size:12px; margin:2px 0 8px;">
+                Saved ${fmtDate(c.createdAt)} · pending Claude's review before it publishes
+              </div>
+              <div style="font-size:13px; color:var(--muted); white-space:pre-wrap;">${preview}${truncated ? '…' : ''}</div>
+            </div>
+          `;
+        }).join('');
+
+    const publishedEl = document.getElementById('commPublished');
+    publishedEl.innerHTML = published.length === 0
+      ? '<p class="muted">Nothing published yet.</p>'
+      : published.map(c => `
+          <div class="card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div>
+              <strong>${c.title || ''}</strong>
+              <div class="muted" style="font-size:12px;">Published ${fmtDate(c.publishedAt)}</div>
+            </div>
+            <button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
+          </div>
+        `).join('');
+
+    publishedEl.querySelectorAll('button[data-comm-id]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const comm = published.find(c => c.id === btn.getAttribute('data-comm-id'));
+        if (comm) composeAnnouncement(comm);
+      });
+    });
+  }
+
+  document.getElementById('commSaveBtn').addEventListener('click', async () => {
+    if (!currentPassword) return;
+    const errorEl = document.getElementById('commError');
+    const infoEl = document.getElementById('commInfo');
+    errorEl.style.display = 'none';
+    infoEl.style.display = 'none';
+
+    const title = document.getElementById('comm-title').value.trim();
+    const body = document.getElementById('comm-body').value.trim();
+    if (!title || !body) {
+      errorEl.textContent = 'Title and content are both required.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('commSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'postCommunication', password: currentPassword, title, body })
+      });
+      const result = await res.json();
+      if (result.status !== 'ok') throw new Error(result.message || 'Server error');
+
+      document.getElementById('comm-title').value = '';
+      document.getElementById('comm-body').value = '';
+      infoEl.textContent = 'Draft saved — ask Claude to review and publish it.';
+      infoEl.style.display = 'block';
+      loadCommunications();
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save draft';
+    }
+  });
+
+  // ── Team roster & shirt sizes ─────────────────────────────────────────────
+  let currentRoster = [];
+
+  async function loadRoster() {
+    if (!currentPassword) return;
+    const url = SCRIPT_URL + '?action=rosterAdmin&password=' + encodeURIComponent(currentPassword);
+    const res = await fetch(url);
+    const result = await res.json();
+    if (result.status === 'ok') {
+      currentRoster = result.roster || [];
+      renderRoster();
+    }
+  }
+
+  function renderRoster() {
+    const tbody = document.querySelector('#rosterTable tbody');
+    tbody.innerHTML = currentRoster.map(r => `
+      <tr>
+        <td>${r.childName || ''}</td>
+        <td>${r.grade || ''}</td>
+        <td>${r.shirtSize || ''}</td>
+        <td>${r.parentName || ''}</td>
+        <td>${r.email || ''}</td>
+      </tr>
+    `).join('');
+
+    // Tally by size, in the same order as SHIRT_SIZES, so ordering shirts is
+    // a straight read down the list (even sizes with zero show up as 0, not
+    // silently missing).
+    const counts = SHIRT_SIZES.reduce((map, size) => { map[size] = 0; return map; }, {});
+    let unspecified = 0;
+    currentRoster.forEach(r => {
+      if (r.shirtSize && counts.hasOwnProperty(r.shirtSize)) counts[r.shirtSize]++;
+      else if (r.shirtSize) counts[r.shirtSize] = (counts[r.shirtSize] || 0) + 1;
+      else unspecified++;
+    });
+
+    const tallyEl = document.getElementById('rosterSizeTally');
+    const tallyEntries = Object.keys(counts).filter(size => counts[size] > 0 || SHIRT_SIZES.includes(size));
+    tallyEl.innerHTML = tallyEntries.map(size => `
+      <div class="stat card"><div class="num">${counts[size]}</div><div class="label">${size}</div></div>
+    `).join('') + (unspecified > 0
+      ? `<div class="stat card"><div class="num">${unspecified}</div><div class="label">Not specified</div></div>`
+      : '');
+  }
+
+  document.getElementById('rosterExportBtn').addEventListener('click', () => {
+    const header = ['Child', 'Grade', 'Shirt Size', 'Parent', 'Email'];
+    const escape = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    const lines = [header.map(escape).join(',')].concat(
+      currentRoster.map(r => [r.childName, r.grade, r.shirtSize, r.parentName, r.email].map(escape).join(','))
+    );
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vcs-robotics-roster-shirt-sizes-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   });
 })();
