@@ -67,8 +67,8 @@
 
         <h2 style="margin-top:36px;">Team communications</h2>
         <p class="muted" style="font-size:13px;">
-          Paste raw notes below and save as a draft — nothing here goes live yet. Ask Claude to
-          review it, format it to match the site, and publish it; only then does it appear on
+          Paste raw notes below and save as a draft — nothing here goes live yet. Review it below,
+          edit as needed, check the preview, then publish; only then does it appear on
           <a href="updates.html" target="_blank">updates.html</a> or become available to announce.
         </p>
         <div class="card">
@@ -86,6 +86,32 @@
         <div style="margin-top:20px;">
           <h3 style="color:var(--black); font-size:15px; text-transform:uppercase; letter-spacing:0.4px;">Drafts pending review</h3>
           <div id="commDrafts" class="muted">Loading…</div>
+        </div>
+
+        <div class="card" id="draftEditor" style="display:none; margin-top:16px; border-color:var(--red);">
+          <h2 style="margin-bottom:2px;">Review draft</h2>
+          <p class="muted" style="font-size:12.5px; margin-top:0;">
+            Edit anything below, check the live preview, then publish.
+          </p>
+          <label>Program</label>
+          <select id="edit-audience"></select>
+          <label>Title</label>
+          <input type="text" id="edit-title">
+          <label>Body (plain text is auto-formatted into paragraphs; HTML is used as-is)</label>
+          <textarea id="edit-body" rows="10"></textarea>
+          <label>Summary — one bullet per line, used in the announcement email</label>
+          <textarea id="edit-summary" rows="4"></textarea>
+
+          <h3 style="color:var(--black); font-size:13px; text-transform:uppercase; letter-spacing:0.4px; margin-top:20px;">
+            Live preview
+          </h3>
+          <div class="card comm-card" id="draftPreview" style="background:#fafafa;"></div>
+
+          <div class="error-msg" id="editError"></div>
+          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button type="button" class="submit-btn" id="publishDraftBtn" style="margin-top:0; width:auto; padding:13px 26px;">Publish →</button>
+            <button type="button" class="btn btn-navy" id="cancelEditBtn">Cancel</button>
+          </div>
         </div>
 
         <div style="margin-top:20px;">
