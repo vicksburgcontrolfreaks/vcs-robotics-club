@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruitment Flyer — Vicksburg Robotics</title>
+<meta name="description" content="Printable recruitment flyer for Vicksburg Robotics (Control Freaks) — scan to join.">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .flyer-page {
+    max-width: 800px;
+    margin: 24px auto 40px;
+    background: #fff;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px -12px rgba(0,0,0,0.25);
+    overflow: hidden;
+    font-family: 'Barlow Semi Condensed', Arial, sans-serif;
+  }
+
+  .flyer-hero {
+    background:
+      linear-gradient(135deg, rgba(0,0,0,0.25), rgba(0,0,0,0.55)),
+      repeating-linear-gradient(-45deg, var(--black) 0 40px, var(--red-dark) 40px 80px);
+    color: #fff;
+    text-align: center;
+    padding: 44px 32px 38px;
+    position: relative;
+  }
+  .flyer-hero img {
+    width: 108px; height: 108px; margin: 0 auto 14px;
+    border-radius: 12px; border: 3px solid #fff; background: #fff;
+  }
+  .flyer-eyebrow {
+    font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    font-size: 15px; color: var(--red);
+    background: #fff; display: inline-block; padding: 4px 14px; border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .flyer-headline {
+    font-family: 'Bebas Neue', 'Barlow Semi Condensed', sans-serif;
+    font-size: clamp(52px, 11vw, 88px);
+    line-height: 0.92;
+    letter-spacing: 1px;
+    margin: 0 0 10px;
+    color: #fff;
+    text-shadow: 0 3px 0 rgba(0,0,0,0.4);
+  }
+  .flyer-tagline {
+    font-size: 20px; font-weight: 600; color: #f0d9da;
+    max-width: 480px; margin: 0 auto;
+  }
+
+  .flyer-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+    background: var(--red);
+  }
+  .flyer-facts div {
+    padding: 16px 8px;
+    border-right: 1px solid rgba(255,255,255,0.25);
+  }
+  .flyer-facts div:last-child { border-right: none; }
+  .flyer-facts .num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px; color: #fff; letter-spacing: 1px; line-height: 1;
+  }
+  .flyer-facts .label {
+    font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #ffe1e3;
+  }
+
+  .flyer-body { padding: 30px 36px 10px; }
+  .flyer-body h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px; letter-spacing: 1px; color: var(--black);
+    text-align: center; margin-bottom: 4px;
+  }
+  .flyer-body > p.lead {
+    text-align: center; color: var(--muted); font-size: 16px;
+    max-width: 520px; margin: 0 auto 22px;
+  }
+
+  .roles-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .role-tile {
+    text-align: center; padding: 14px 6px;
+    border: 2px solid var(--black); border-radius: 10px;
+  }
+  .role-tile .role-name {
+    font-weight: 700; font-size: 14.5px; color: var(--black);
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+
+  .flyer-cta {
+    background: var(--black);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 26px 32px;
+    margin-top: 26px;
+    flex-wrap: wrap;
+  }
+  .flyer-cta svg {
+    width: 128px; height: 128px; background: #fff; border-radius: 10px; padding: 8px; flex-shrink: 0;
+  }
+  .flyer-cta-text { text-align: left; }
+  .flyer-cta-text .scan-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px; letter-spacing: 1px; color: var(--red);
+    line-height: 1;
+  }
+  .flyer-cta-text .scan-sub { font-size: 15px; color: #d9d9d9; margin: 6px 0 10px; }
+  .flyer-cta-text .scan-url {
+    font-weight: 700; font-size: 15px; color: #fff;
+    border-top: 1px solid #444; padding-top: 8px; display: inline-block;
+  }
+
+  .flyer-footer {
+    text-align: center; font-size: 12px; color: var(--muted);
+    padding: 14px 20px 22px;
+  }
+
+  @media (max-width: 560px) {
+    .roles-row { grid-template-columns: repeat(2, 1fr); }
+    .flyer-cta { flex-direction: column; text-align: center; }
+    .flyer-cta-text { text-align: center; }
+    .flyer-cta-text .scan-url { border-top: none; padding-top: 0; }
+  }
+
+  @media print {
+    .site-header, .site-footer, .no-print { display: none; }
+    body { background: #fff; }
+    main { padding: 0; }
+    .flyer-page { margin: 0 auto; box-shadow: none; border: none; max-width: 100%; }
+    @page { size: letter portrait; margin: 0.3in; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img class="brand-logo" src="img/control-freaks-logo.png" alt="Control Freaks logo">
+      <span>
+        <span class="brand-name">Vicksburg Robotics</span>
+        <span class="brand-sub">Control Freaks</span>
+      </span>
+    </a>
+    <nav class="site-nav">
+      <a href="index.html">Home</a>
+      <a href="about.html">About &amp; Team</a>
+      <a href="updates.html">Updates</a>
+      <a href="join.html">Join / Sign Up</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:20px;">
+    <div class="wrap" style="text-align:center;">
+      <button type="button" class="btn btn-navy no-print" onclick="window.print()">Print flyer</button>
+    </div>
+
+    <article class="flyer-page">
+      <div class="flyer-hero">
+        <img src="img/control-freaks-logo.png" alt="Control Freaks logo">
+        <div class="flyer-eyebrow">Vicksburg Community Schools</div>
+        <h1 class="flyer-headline">JOIN THE&nbsp;TEAM</h1>
+        <p class="flyer-tagline">Building robots. Building engineers. No experience needed.</p>
+      </div>
+
+      <div class="flyer-facts">
+        <div>
+          <div class="num">K&ndash;12</div>
+          <div class="label">Elementary&nbsp;&middot; Middle&nbsp;&middot; High</div>
+        </div>
+        <div>
+          <div class="num">FRC 8126</div>
+          <div class="label">High School Team</div>
+        </div>
+        <div>
+          <div class="num">FTC 5618/6494</div>
+          <div class="label">Middle School Teams</div>
+        </div>
+      </div>
+
+      <div class="flyer-body">
+        <h2>Find your role</h2>
+        <p class="lead">Every team needs more than robot builders — pick what fits you.</p>
+        <div class="roles-row">
+          <div class="role-tile"><div class="role-name">Programmer</div></div>
+          <div class="role-tile"><div class="role-name">Builder /<br>Fabrication</div></div>
+          <div class="role-tile"><div class="role-name">Media</div></div>
+          <div class="role-tile"><div class="role-name">Engineer&rsquo;s<br>Portfolio</div></div>
+        </div>
+      </div>
+
+      <div class="flyer-cta">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51 51" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h51v51H0z"/><path stroke="#1a1a1a" d="M1 1.5h7m1 0h1m5 0h1m1 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m3 0h1m3 0h1m1 0h7M1 2.5h1m5 0h1m1 0h3m2 0h2m2 0h4m1 0h1m2 0h1m1 0h5m1 0h3m2 0h3m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h2m3 0h3m2 0h1m3 0h2m2 0h1m1 0h1m5 0h1m4 0h2m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m2 0h2m1 0h1m3 0h1m2 0h2m1 0h6m3 0h1m1 0h5m1 0h1m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h2m1 0h3m2 0h5m2 0h1m5 0h3m4 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h2m2 0h1m1 0h1m2 0h1m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m1 0h2m3 0h1m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h3m3 0h1m2 0h1m3 0h1m1 0h2M3 9.5h3m1 0h1m1 0h3m1 0h3m1 0h2m2 0h9m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h3M5 10.5h1m2 0h1m2 0h3m2 0h1m3 0h2m1 0h1m5 0h3m1 0h1m2 0h3m3 0h3m2 0h1M2 11.5h3m1 0h7m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m1 0h4m1 0h3m1 0h2M2 12.5h2m1 0h1m2 0h2m1 0h2m1 0h1m1 0h6m1 0h2m1 0h4m1 0h1m4 0h1m2 0h1m1 0h2m2 0h1M1 13.5h1m2 0h5m1 0h1m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h6m1 0h3m1 0h3m1 0h1m2 0h3M2 14.5h1m1 0h1m1 0h1m1 0h6m2 0h3m1 0h3m1 0h1m8 0h1m3 0h2m1 0h1m1 0h2m1 0h1m1 0h1M4 15.5h1m2 0h2m1 0h2m4 0h1m3 0h2m1 0h1m1 0h2m3 0h2m1 0h3m3 0h3m2 0h6M1 16.5h1m3 0h2m3 0h3m1 0h8m2 0h2m2 0h1m4 0h1m1 0h1m2 0h4m1 0h1m1 0h1m1 0h3M1 17.5h5m1 0h2m3 0h1m1 0h2m1 0h1m2 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m1 0h1m2 0h3m1 0h1m2 0h1M2 18.5h2m2 0h1m3 0h1m2 0h3m1 0h1m1 0h10m6 0h6m2 0h6M1 19.5h1m1 0h1m2 0h2m2 0h1m3 0h1m1 0h2m1 0h1m2 0h1m2 0h3m1 0h3m1 0h2m7 0h3m1 0h1m1 0h2M1 20.5h3m2 0h1m5 0h2m2 0h1m2 0h1m1 0h1m4 0h1m2 0h2m3 0h1m3 0h3m2 0h3M2 21.5h3m2 0h2m4 0h3m1 0h1m2 0h1m2 0h2m4 0h1m2 0h1m2 0h1m1 0h5m1 0h2m2 0h1m1 0h1M6 22.5h1m2 0h1m1 0h3m1 0h1m4 0h1m1 0h2m1 0h4m2 0h1m1 0h1m8 0h2M1 23.5h1m3 0h5m1 0h2m2 0h2m2 0h1m2 0h7m3 0h4m1 0h1m1 0h1m1 0h5m2 0h2M5 24.5h1m3 0h1m2 0h3m2 0h2m4 0h1m3 0h1m4 0h1m5 0h1m2 0h1m3 0h1m3 0h1M3 25.5h1m1 0h1m1 0h1m1 0h3m5 0h1m1 0h2m2 0h1m1 0h1m1 0h1m2 0h1m3 0h4m3 0h1m1 0h1m1 0h1m1 0h3M2 26.5h4m3 0h1m4 0h5m1 0h2m1 0h1m3 0h1m3 0h2m3 0h1m1 0h1m2 0h1m3 0h5M1 27.5h3m1 0h12m1 0h3m2 0h5m1 0h1m1 0h1m3 0h2m1 0h8m1 0h1m1 0h1M1 28.5h3m1 0h2m1 0h1m4 0h2m3 0h2m2 0h1m2 0h1m2 0h1m1 0h2m2 0h2m3 0h1m1 0h2m1 0h1m3 0h2M2 29.5h1m1 0h1m1 0h5m2 0h5m1 0h1m2 0h3m4 0h2m1 0h2m2 0h2m2 0h2m1 0h1m3 0h1m1 0h1M1 30.5h4m4 0h6m2 0h1m1 0h2m3 0h2m1 0h1m3 0h1m1 0h1m4 0h1m2 0h2m1 0h3M1 31.5h3m1 0h1m1 0h2m2 0h2m1 0h2m2 0h1m1 0h1m2 0h2m2 0h3m1 0h9m1 0h3m1 0h1m1 0h3M1 32.5h1m2 0h2m3 0h2m2 0h1m2 0h3m1 0h5m4 0h1m4 0h1m2 0h3m1 0h1m2 0h2m2 0h1M3 33.5h5m1 0h1m2 0h6m4 0h2m1 0h1m2 0h1m2 0h3m1 0h2m1 0h6m1 0h1m1 0h1m1 0h1M1 34.5h1m1 0h1m1 0h1m2 0h3m2 0h1m1 0h3m3 0h2m4 0h1m2 0h2m1 0h2m3 0h1m1 0h1m1 0h1m5 0h1M7 35.5h1m1 0h1m2 0h1m2 0h2m1 0h1m8 0h1m2 0h1m1 0h5m1 0h2m2 0h2m1 0h1m2 0h2M1 36.5h6m1 0h3m1 0h1m1 0h2m1 0h3m1 0h2m3 0h1m8 0h1m2 0h2m1 0h1m6 0h1M2 37.5h4m1 0h3m1 0h2m2 0h1m2 0h2m3 0h4m1 0h2m1 0h1m4 0h2m1 0h3m1 0h1m1 0h4M1 38.5h2m1 0h1m1 0h1m2 0h2m4 0h5m2 0h4m3 0h3m9 0h1m4 0h1M2 39.5h1m3 0h3m3 0h2m2 0h2m1 0h1m1 0h1m2 0h2m3 0h2m1 0h5m2 0h1m1 0h5m2 0h2M2 40.5h3m5 0h5m1 0h3m1 0h3m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m11 0h1m1 0h2M1 41.5h3m3 0h1m2 0h1m1 0h2m4 0h1m4 0h5m1 0h1m2 0h1m3 0h3m1 0h6m2 0h2M9 42.5h4m3 0h1m1 0h2m3 0h1m3 0h1m2 0h1m1 0h1m1 0h1m2 0h1m3 0h1m3 0h1M1 43.5h7m3 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h1m1 0h1m2 0h1m1 0h2m2 0h3m2 0h1m1 0h1m1 0h2m1 0h2M1 44.5h1m5 0h1m2 0h1m3 0h2m4 0h1m2 0h1m3 0h2m1 0h1m2 0h3m2 0h4m3 0h1m2 0h1M1 45.5h1m1 0h3m1 0h1m1 0h2m5 0h1m3 0h8m2 0h2m3 0h11m1 0h1m1 0h1M1 46.5h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h3m3 0h2m2 0h1m2 0h1m1 0h3m2 0h3m1 0h1m4 0h2m2 0h1M1 47.5h1m1 0h3m1 0h1m1 0h1m4 0h1m1 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h4m1 0h5m1 0h1m4 0h4M1 48.5h1m5 0h1m4 0h3m2 0h3m1 0h1m2 0h1m1 0h6m1 0h2m5 0h6m3 0h1M1 49.5h7m3 0h1m6 0h1m4 0h1m2 0h2m1 0h4m1 0h4m1 0h1m1 0h1m4 0h4"/></svg>
+        <div class="flyer-cta-text">
+          <div class="scan-label">SCAN TO JOIN</div>
+          <div class="scan-sub">Get season updates, meeting times, and sign-up info.</div>
+          <div class="scan-url">vicksburgcontrolfreaks.github.io/vcs-robotics-club/join.html</div>
+        </div>
+      </div>
+
+      <p class="flyer-footer">Vicksburg Robotics &middot; Vicksburg Community Schools &middot; questions welcome any time</p>
+    </article>
+  </section>
+</main>
+
+<footer class="site-footer no-print">
+  <div class="wrap">
+    <p>Vicksburg Robotics · Control Freaks</p>
+    <p>Vicksburg Community Schools · <a href="index.html">Home</a> · <a href="join.html">Join</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
