@@ -72,12 +72,12 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
   Drafts are written from admin.html; review, edit, optional AI polish, and publish all
   happen there (in-browser, no Claude Code session needed) — publishing is what makes a post appear
   on that program's `updates-<program>.html` page.
-- **AI polish + QR placeholders.** The "✨ Polish with AI" button sends a draft's raw title/body to
+- **AI polish + QR placeholder.** The "✨ Polish with AI" button sends a draft's raw title/body to
   Claude to copyedit and catch meta-instructions written to the editor rather than the reader (e.g.
   "share the QR code here"). Rather than have the model reproduce QR SVG path data (unreliable), it's
-  told to emit a literal `[[QR_JOIN]]` / `[[QR_DISCORD]]` placeholder, which `Code.gs` substitutes
-  with the real, pre-generated SVG block (`JOIN_QR_SVG_BLOCK` / `DISCORD_QR_SVG_BLOCK`) before
-  returning the result — the model only ever decides *where*, never *what*.
+  told to emit a literal `[[QR_JOIN]]` placeholder, which `Code.gs` substitutes with the real,
+  pre-generated SVG block (`JOIN_QR_SVG_BLOCK`) before returning the result — the model only ever
+  decides *where*, never *what*.
 
 ### Endpoints (all on the one deployed web app URL)
 
@@ -90,7 +90,7 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Post communication | POST | `{ action: 'postCommunication', password, title, body, audience }` | Appends a Communications row with status `draft`; `audience` must be one of `COMM_AUDIENCE_CODES` |
 | Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience?, announcedAt? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow and by "Mark as announced" (sets `announcedAt`) |
 | Delete communication | POST | `{ action: 'deleteCommunication', password, id }` | Removes a Communications row entirely — for stale/duplicate drafts |
-| Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience, instructions? }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent, optionally following a free-form `instructions` note (e.g. "add the Discord QR too, side by side") — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
+| Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience, instructions? }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent, optionally following a free-form `instructions` note (e.g. "keep this to two short paragraphs") — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
 | Published communications | GET | `?action=publishedCommunications&audience=<code>` | Public, no password — only `published` rows, newest first, optionally scoped to one program. Powers each updates-<program>.html |
 | Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published, every program), for admin.html's review lists |
 | Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |

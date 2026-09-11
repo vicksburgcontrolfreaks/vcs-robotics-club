@@ -150,9 +150,8 @@ page titles) no longer reads as FRC-8126-specific.
       every page) but now render red/black respectively.
 - [ ] **Redeploy required** (CLUB_NAME, confirmation email footer) — folded into the single v2.6.0
       redeploy noted under Team communications above; no separate action needed.
-- [ ] **QR scan card still on the old palette.** The join-page QR artifact
-      (https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858) is navy/gold from before
-      this rebrand — worth regenerating to match, whenever convenient.
+- [x] **QR scan card on-brand.** Superseded by [scan-card.html](scan-card.html) — a real, on-site,
+      on-brand page (see New site pages below), replacing the old navy/gold private artifact link.
 - [ ] **Homepage/About framing still HS-centric.** Intentionally left alone this round: the
       homepage's hero paragraph and About page still describe the club as "home of FRC Team 8126" —
       now that Elementary/Middle School have their own pages, that framing could be revisited to
@@ -173,8 +172,15 @@ page titles) no longer reads as FRC-8126-specific.
       instead of the container — silently forcing horizontal scroll on the whole page. Verified with
       Playwright (measured `document.documentElement.scrollWidth` against `innerWidth` at 480px
       before and after) rather than trusting a visual screenshot alone.
-
-## Keeping the list current (process, not code)
+- [x] **Recruitment flyer.** [flyer.html](flyer.html) — printable red/black poster (Bebas Neue +
+      Barlow Semi Condensed), K-12/FRC 8126/FTC 5618 & 6494 facts, role highlights, and the same
+      self-hosted join QR pattern as scan-card.html. Quick link added alongside the others.
+- [x] **Discord removed everywhere.** Dropped from [scan-card.html](scan-card.html) (back to a
+      single centered QR tile), the AI polish system prompt and `[[QR_DISCORD]]`/
+      `DISCORD_QR_SVG_BLOCK` in [apps-script/Code.gs](apps-script/Code.gs) (bumped to v2.8.0), the
+      admin AI-instructions placeholder example, and the live "Informational Meeting" post (which
+      had already been AI-polished with a Discord QR + mention — fixed via direct API call back to
+      a single mailing-list QR). `flyer.html` never had Discord content to begin with.
 
 - The `Subscribers` sheet already stays accurate on its own: people self-serve subscribe
   (join.html) and self-serve unsubscribe (one click from the confirmation/every email footer) —
@@ -186,5 +192,5 @@ page titles) no longer reads as FRC-8126-specific.
 
 ## Reference
 
-- **Join-page QR code ("Control Freaks Scan Card")** — printable QR linking to `join.html`, navy/gold
-  themed, has a print-flyer button: https://claude.ai/code/artifact/6f310e9f-0205-4cf5-a6e4-304d39c68858
+- **Join-page QR code** — see [scan-card.html](scan-card.html) (on-site, on-brand, print-ready). The
+  original private Claude artifact this replaced is no longer linked from anywhere on the site.
