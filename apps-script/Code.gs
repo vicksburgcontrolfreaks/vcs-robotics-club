@@ -22,7 +22,7 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.7.0';
+const BACKEND_VERSION = '2.8.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
@@ -35,7 +35,6 @@ const CLAUDE_MODEL = 'claude-opus-5';
 // inserts these verbatim rather than asking the model to reproduce SVG path
 // data itself, which LLMs render unreliably.
 const JOIN_QR_SVG_BLOCK = '<div class="comm-qr">\n  <a href="join.html" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 51 51" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h51v51H0z"/><path stroke="#1a1a1a" d="M1 1.5h7m1 0h1m5 0h1m1 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m3 0h1m3 0h1m1 0h7M1 2.5h1m5 0h1m1 0h3m2 0h2m2 0h4m1 0h1m2 0h1m1 0h5m1 0h3m2 0h3m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h2m3 0h3m2 0h1m3 0h2m2 0h1m1 0h1m5 0h1m4 0h2m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m2 0h2m1 0h1m3 0h1m2 0h2m1 0h6m3 0h1m1 0h5m1 0h1m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h2m1 0h3m2 0h5m2 0h1m5 0h3m4 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h2m2 0h1m1 0h1m2 0h1m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m1 0h2m3 0h1m3 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h3m3 0h1m2 0h1m3 0h1m1 0h2M3 9.5h3m1 0h1m1 0h3m1 0h3m1 0h2m2 0h9m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h3M5 10.5h1m2 0h1m2 0h3m2 0h1m3 0h2m1 0h1m5 0h3m1 0h1m2 0h3m3 0h3m2 0h1M2 11.5h3m1 0h7m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m1 0h4m1 0h3m1 0h2M2 12.5h2m1 0h1m2 0h2m1 0h2m1 0h1m1 0h6m1 0h2m1 0h4m1 0h1m4 0h1m2 0h1m1 0h2m2 0h1M1 13.5h1m2 0h5m1 0h1m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m1 0h6m1 0h3m1 0h3m1 0h1m2 0h3M2 14.5h1m1 0h1m1 0h1m1 0h6m2 0h3m1 0h3m1 0h1m8 0h1m3 0h2m1 0h1m1 0h2m1 0h1m1 0h1M4 15.5h1m2 0h2m1 0h2m4 0h1m3 0h2m1 0h1m1 0h2m3 0h2m1 0h3m3 0h3m2 0h6M1 16.5h1m3 0h2m3 0h3m1 0h8m2 0h2m2 0h1m4 0h1m1 0h1m2 0h4m1 0h1m1 0h1m1 0h3M1 17.5h5m1 0h2m3 0h1m1 0h2m1 0h1m2 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h4m1 0h1m2 0h3m1 0h1m2 0h1M2 18.5h2m2 0h1m3 0h1m2 0h3m1 0h1m1 0h10m6 0h6m2 0h6M1 19.5h1m1 0h1m2 0h2m2 0h1m3 0h1m1 0h2m1 0h1m2 0h1m2 0h3m1 0h3m1 0h2m7 0h3m1 0h1m1 0h2M1 20.5h3m2 0h1m5 0h2m2 0h1m2 0h1m1 0h1m4 0h1m2 0h2m3 0h1m3 0h3m2 0h3M2 21.5h3m2 0h2m4 0h3m1 0h1m2 0h1m2 0h2m4 0h1m2 0h1m2 0h1m1 0h5m1 0h2m2 0h1m1 0h1M6 22.5h1m2 0h1m1 0h3m1 0h1m4 0h1m1 0h2m1 0h4m2 0h1m1 0h1m8 0h2M1 23.5h1m3 0h5m1 0h2m2 0h2m2 0h1m2 0h7m3 0h4m1 0h1m1 0h1m1 0h5m2 0h2M5 24.5h1m3 0h1m2 0h3m2 0h2m4 0h1m3 0h1m4 0h1m5 0h1m2 0h1m3 0h1m3 0h1M3 25.5h1m1 0h1m1 0h1m1 0h3m5 0h1m1 0h2m2 0h1m1 0h1m1 0h1m2 0h1m3 0h4m3 0h1m1 0h1m1 0h1m1 0h3M2 26.5h4m3 0h1m4 0h5m1 0h2m1 0h1m3 0h1m3 0h2m3 0h1m1 0h1m2 0h1m3 0h5M1 27.5h3m1 0h12m1 0h3m2 0h5m1 0h1m1 0h1m3 0h2m1 0h8m1 0h1m1 0h1M1 28.5h3m1 0h2m1 0h1m4 0h2m3 0h2m2 0h1m2 0h1m2 0h1m1 0h2m2 0h2m3 0h1m1 0h2m1 0h1m3 0h2M2 29.5h1m1 0h1m1 0h5m2 0h5m1 0h1m2 0h3m4 0h2m1 0h2m2 0h2m2 0h2m1 0h1m3 0h1m1 0h1M1 30.5h4m4 0h6m2 0h1m1 0h2m3 0h2m1 0h1m3 0h1m1 0h1m4 0h1m2 0h2m1 0h3M1 31.5h3m1 0h1m1 0h2m2 0h2m1 0h2m2 0h1m1 0h1m2 0h2m2 0h3m1 0h9m1 0h3m1 0h1m1 0h3M1 32.5h1m2 0h2m3 0h2m2 0h1m2 0h3m1 0h5m4 0h1m4 0h1m2 0h3m1 0h1m2 0h2m2 0h1M3 33.5h5m1 0h1m2 0h6m4 0h2m1 0h1m2 0h1m2 0h3m1 0h2m1 0h6m1 0h1m1 0h1m1 0h1M1 34.5h1m1 0h1m1 0h1m2 0h3m2 0h1m1 0h3m3 0h2m4 0h1m2 0h2m1 0h2m3 0h1m1 0h1m1 0h1m5 0h1M7 35.5h1m1 0h1m2 0h1m2 0h2m1 0h1m8 0h1m2 0h1m1 0h5m1 0h2m2 0h2m1 0h1m2 0h2M1 36.5h6m1 0h3m1 0h1m1 0h2m1 0h3m1 0h2m3 0h1m8 0h1m2 0h2m1 0h1m6 0h1M2 37.5h4m1 0h3m1 0h2m2 0h1m2 0h2m3 0h4m1 0h2m1 0h1m4 0h2m1 0h3m1 0h1m1 0h4M1 38.5h2m1 0h1m1 0h1m2 0h2m4 0h5m2 0h4m3 0h3m9 0h1m4 0h1M2 39.5h1m3 0h3m3 0h2m2 0h2m1 0h1m1 0h1m2 0h2m3 0h2m1 0h5m2 0h1m1 0h5m2 0h2M2 40.5h3m5 0h5m1 0h3m1 0h3m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m11 0h1m1 0h2M1 41.5h3m3 0h1m2 0h1m1 0h2m4 0h1m4 0h5m1 0h1m2 0h1m3 0h3m1 0h6m2 0h2M9 42.5h4m3 0h1m1 0h2m3 0h1m3 0h1m2 0h1m1 0h1m1 0h1m2 0h1m3 0h1m3 0h1M1 43.5h7m3 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h1m1 0h1m2 0h1m1 0h2m2 0h3m2 0h1m1 0h1m1 0h2m1 0h2M1 44.5h1m5 0h1m2 0h1m3 0h2m4 0h1m2 0h1m3 0h2m1 0h1m2 0h3m2 0h4m3 0h1m2 0h1M1 45.5h1m1 0h3m1 0h1m1 0h2m5 0h1m3 0h8m2 0h2m3 0h11m1 0h1m1 0h1M1 46.5h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h3m3 0h2m2 0h1m2 0h1m1 0h3m2 0h3m1 0h1m4 0h2m2 0h1M1 47.5h1m1 0h3m1 0h1m1 0h1m4 0h1m1 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h4m1 0h5m1 0h1m4 0h4M1 48.5h1m5 0h1m4 0h3m2 0h3m1 0h1m2 0h1m1 0h6m1 0h2m5 0h6m3 0h1M1 49.5h7m3 0h1m6 0h1m4 0h1m2 0h2m1 0h4m1 0h4m1 0h1m1 0h1m4 0h4"/></svg></a>\n  <p>Scan or <a href="join.html" target="_blank">click here</a> to join the mailing list</p>\n</div>';
-const DISCORD_QR_SVG_BLOCK = '<div class="comm-qr">\n  <a href="https://discord.gg/CYyXr84r8" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h35v35H0z"/><path stroke="#1a1a1a" d="M1 1.5h7m2 0h1m1 0h4m1 0h1m1 0h5m1 0h1m1 0h7M1 2.5h1m5 0h1m2 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m1 0h2m1 0h7m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m3 0h2m1 0h1m2 0h2m1 0h3m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m2 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m2 0h1m1 0h1m2 0h3m1 0h2m1 0h3m2 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M11 8.5h3m1 0h1m1 0h1m1 0h1m1 0h1m3 0h1M4 9.5h2m1 0h2m5 0h1m1 0h3m2 0h1m1 0h1m6 0h2M1 10.5h1m2 0h3m2 0h1m1 0h1m5 0h2m1 0h3m1 0h1m1 0h1m1 0h4M3 11.5h1m1 0h1m1 0h3m3 0h2m1 0h1m3 0h2m1 0h3m1 0h2m3 0h2M1 12.5h1m2 0h1m1 0h1m1 0h1m1 0h3m1 0h2m2 0h2m1 0h11M3 13.5h3m1 0h4m1 0h4m1 0h1m2 0h3m2 0h1m1 0h4m2 0h1M1 14.5h3m1 0h2m3 0h1m4 0h3m4 0h1m1 0h1m1 0h1m1 0h2m1 0h2M1 15.5h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h1m2 0h1m2 0h2m3 0h4M1 16.5h1m2 0h2m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m3 0h1m2 0h5m2 0h1m1 0h1M1 17.5h2m3 0h5m1 0h1m8 0h1m2 0h1m1 0h2m4 0h1M1 18.5h1m2 0h3m1 0h4m1 0h1m2 0h3m1 0h4m1 0h6m1 0h2M1 19.5h1m2 0h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m6 0h1m1 0h2m2 0h2m1 0h1M1 20.5h1m1 0h3m3 0h8m3 0h2m2 0h2m1 0h1m2 0h4M1 21.5h7m1 0h1m2 0h1m2 0h1m5 0h1m3 0h2m1 0h1m1 0h1M1 22.5h1m1 0h2m1 0h1m1 0h3m2 0h2m1 0h2m1 0h1m2 0h2m2 0h4M1 23.5h1m2 0h1m1 0h3m2 0h1m3 0h4m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3M1 24.5h1m1 0h1m1 0h2m1 0h2m2 0h3m2 0h5m1 0h1m5 0h1m1 0h3M1 25.5h2m1 0h4m1 0h2m1 0h2m2 0h1m1 0h2m1 0h1m1 0h1m1 0h5m3 0h1M9 26.5h1m1 0h1m1 0h2m2 0h3m3 0h3m3 0h2m1 0h1M1 27.5h7m1 0h3m2 0h1m3 0h1m1 0h4m1 0h1m1 0h1m1 0h2M1 28.5h1m5 0h1m2 0h1m1 0h2m6 0h2m2 0h2m3 0h4M1 29.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m4 0h2m1 0h9M1 30.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h4m2 0h1m2 0h2m1 0h1m1 0h1m1 0h1M1 31.5h1m1 0h3m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m2 0h1m1 0h2m4 0h5M1 32.5h1m5 0h1m2 0h3m3 0h1m2 0h3m1 0h2m6 0h3M1 33.5h7m2 0h1m1 0h2m1 0h1m1 0h1m1 0h1m4 0h2m1 0h1m1 0h1m1 0h1"/></svg></a>\n  <p>Scan or <a href="https://discord.gg/CYyXr84r8" target="_blank">click here</a> to join our Discord</p>\n</div>';
 
 // ── Entry points ──────────────────────────────────────────────────────────
 
@@ -438,19 +437,14 @@ function handlePolishCommunication(data) {
     '  - If it asks to share/include the mailing-list sign-up QR code or link, insert exactly this',
     '    placeholder on its own line — nothing wrapped around it, it already renders as a complete,',
     '    styled block: [[QR_JOIN]]',
-    '  - If it asks to share/include the Discord invite/QR code, insert exactly this placeholder the',
-    '    same way: [[QR_DISCORD]]',
-    '  - If asked for both QR codes placed side by side, wrap the two placeholders (only the',
-    '    placeholders — nothing else) in one row like this:',
-    '    <div class="comm-qr-row">[[QR_JOIN]][[QR_DISCORD]]</div>',
-    '  - Never invent your own QR markup, and never use a placeholder more than once each.',
+    '  - Never invent your own QR markup, and never use the placeholder more than once.',
     '  - For any other meta-instruction you cannot confidently resolve, leave it out of the body',
     '    entirely and describe what\'s needed in the "notes" field instead — never invent a link,',
     '    date, or fact to satisfy it.',
     '',
     'If an "Additional instructions for this revision" section is given below, follow it — it may',
-    'ask for layout changes (like the QR row above), tone adjustments, or content changes. The same',
-    'placeholder rule still applies: never draw a QR code yourself, only place the placeholders.',
+    'ask for tone adjustments, layout changes, or content changes. The same placeholder rule still',
+    'applies: never draw a QR code yourself, only place the placeholder.',
     '',
     'Also fix grammar/typos and tighten the wording — warm but professional, matching a school',
     'robotics program\'s voice. Preserve every concrete fact (dates, times, locations, names, links)',
@@ -520,7 +514,6 @@ function handlePolishCommunication(data) {
 
   let polishedBody = String(parsed.body || '');
   polishedBody = polishedBody.split('[[QR_JOIN]]').join(JOIN_QR_SVG_BLOCK);
-  polishedBody = polishedBody.split('[[QR_DISCORD]]').join(DISCORD_QR_SVG_BLOCK);
 
   return jsonOut({
     status: 'ok',
