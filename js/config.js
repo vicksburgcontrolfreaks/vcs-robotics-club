@@ -10,7 +10,11 @@ const ROLE_OPTIONS = [
   "Engineer's Portfolio"
 ];
 const SHIRT_SIZES = ['Youth XS','Youth S','Youth M','Youth L','Adult S','Adult M','Adult L','Adult XL','Adult XXL'];
-const GRADES = ['6th','7th','8th','9th','10th','11th','12th'];
+// K-12, in order — needed since the club now covers Elementary Robotics too,
+// not just middle/high school. Also doubles as the sort order for the
+// roster admin page (see byGrade() in js/admin.js): unrecognized grades sort
+// to the end, so any grade added here is picked up there automatically.
+const GRADES = ['K','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
 
 // Mailing-list segments. "lightweight" is a standalone quarterly-only digest
 // (no team-specific mail) — aimed at sponsors and anyone who wants low-volume

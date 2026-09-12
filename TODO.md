@@ -5,8 +5,11 @@ Nothing here is implemented yet — this is planning only.
 
 ## Sign-up form
 
-- [ ] **Grades K–12, not just 6–12.** [js/config.js](js/config.js) `GRADES` currently only lists
-      `6th`–`12th`. Extend to `K, 1st, 2nd, ... 12th`. Also check whether
+- [x] **Grades K–12, not just 6–12.** [js/config.js](js/config.js) `GRADES` extended to
+      `K, 1st, 2nd, ... 12th`. Prompted by a real bug: a 5th grader added to the roster sorted to
+      the very bottom (after 8th grade) on the admin roster page, since `byGrade()` in
+      [js/admin.js](js/admin.js) sorts by position in `GRADES` and unrecognized grades sort last —
+      "5th" wasn't in the list at all. Still open: check whether
       `C:\Users\matt\StudioProjects\cte\8126\parent_form.html` has its own hardcoded grade list
       (separate repo, shares the same Apps Script backend but may not share `config.js`) — update
       there too if so.
