@@ -144,11 +144,15 @@
 
         <div id="section-roster" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:36px 0 12px;">
           <h2 style="margin:0;">Team roster &amp; shirt sizes</h2>
-          <button type="button" class="btn btn-gold" id="rosterExportBtn">Download CSV</button>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-navy" id="rosterPrintBtn">Print roster</button>
+            <button type="button" class="btn btn-gold" id="rosterExportBtn">Download CSV</button>
+          </div>
         </div>
         <p class="muted" style="font-size:13px; margin-top:-6px;">
           Pulled straight from Parent Submissions — one row per child, so this doubles as your
-          shirt order list.
+          shirt order list. "Print roster" prints a simpler paper version (grade, name, shirt size,
+          and a blank paid box) for handing out shirts or collecting payment.
         </p>
         <div class="grid" id="rosterSizeTally" style="margin-bottom:16px;"></div>
         <div class="card" style="overflow-x:auto;">
@@ -166,6 +170,22 @@
       </div>
     </div>
   </section>
+
+  <!-- Print-only roster: shown full-page on print, hidden on screen (see
+       #rosterPrintArea in css/style.css). Deliberately just these four
+       columns — no roles, no parent/email. -->
+  <div id="rosterPrintArea">
+    <h1 style="font-size:22px; margin:0 0 4px;">Vicksburg Robotics — Team Roster</h1>
+    <p style="font-size:13px; color:#333; margin:0 0 14px;">Control Freaks · printed <span id="rosterPrintDate"></span></p>
+    <table id="rosterPrintTable">
+      <thead>
+        <tr>
+          <th>Grade</th><th>Name</th><th>Shirt Size</th><th>Paid</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </main>
 
 <footer class="site-footer">

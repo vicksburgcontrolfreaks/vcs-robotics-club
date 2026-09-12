@@ -362,3 +362,37 @@ table th { color: var(--black); font-size: 12px; text-transform: uppercase; lett
     width: 100%;
   }
 }
+
+/* ── Printable roster (admin.html) ─────────────────────────────────────────
+   #rosterPrintArea holds a second, print-only table (Grade / Name / Shirt
+   Size / Paid) — deliberately fewer columns than the on-screen roster table,
+   and rendered separately rather than just @media-print-hiding columns of
+   the on-screen table, since the on-screen table shows parent/email (needed
+   day-to-day) and this print view intentionally doesn't. Hidden on screen;
+   shown full-page on print. Uses display:none (not visibility:hidden) on
+   the sibling header/section/footer so they're removed from layout
+   entirely — visibility:hidden alone would leave their height in the
+   document flow and print extra blank pages below the roster table. */
+#rosterPrintArea { display: none; }
+
+#rosterPrintTable { width: 100%; border-collapse: collapse; }
+#rosterPrintTable th, #rosterPrintTable td {
+  border: 1px solid #000;
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 14px;
+}
+#rosterPrintTable th { font-weight: bold; }
+#rosterPrintTable td.paid-cell { text-align: center; width: 70px; }
+.paid-box {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #000;
+}
+
+@media print {
+  .site-header, .site-footer, main > .section { display: none !important; }
+  #rosterPrintArea { display: block; }
+  @page { size: letter portrait; margin: 0.5in; }
+}

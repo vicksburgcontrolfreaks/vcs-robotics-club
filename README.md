@@ -113,7 +113,9 @@ Besides the subscriber list/export, admin.html also holds: quick links out to th
 scan card and updates.html; a communications draft form with an in-browser review/edit/publish
 flow (live preview, plain-text auto-formatted into paragraphs) and per-draft delete (see
 Communications above); and the team roster with a shirt-size tally + CSV export, pulled straight
-from Parent Submissions.
+from Parent Submissions. The roster also has a **Print roster** button producing a separate,
+simpler paper table (Grade / Name as first-name-plus-last-initial / Shirt Size / a blank "Paid"
+box, no roles or contact info) — see `#rosterPrintArea` in css/style.css and `js/admin.js`.
 
 ## Local development
 
