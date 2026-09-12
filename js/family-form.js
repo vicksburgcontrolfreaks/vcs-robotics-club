@@ -86,8 +86,19 @@
           <input type="email" id="p-email" required>
           <label>Phone *</label>
           <input type="tel" id="p-phone" required placeholder="(269) 555-1234">
+
+          <div class="child-title" style="margin-top:18px;">Second parent / guardian (optional)</div>
+          <div class="row2">
+            <div><label>First name</label><input type="text" id="p2-first"></div>
+            <div><label>Last name</label><input type="text" id="p2-last"></div>
+          </div>
+          <label>Email</label>
+          <input type="email" id="p2-email" placeholder="optional">
+          <label>Phone</label>
+          <input type="tel" id="p2-phone" placeholder="(269) 555-1234  optional">
+
           <div id="extraContactsContainer"></div>
-          <button type="button" class="add-child-btn" id="addContactBtn" style="margin-top:14px;">+ Add another contact person</button>
+          <button type="button" class="add-child-btn" id="addContactBtn" style="margin-top:14px;">+ Add another emergency/pickup contact</button>
         </div>
         <div class="card">
           <h2>Your child(ren)</h2>
@@ -138,6 +149,15 @@
       const last = document.getElementById('p-last').value.trim();
       const email = document.getElementById('p-email').value.trim();
       const phone = document.getElementById('p-phone').value.trim();
+
+      const p2First = document.getElementById('p2-first').value.trim();
+      const p2Last = document.getElementById('p2-last').value.trim();
+      const p2Email = document.getElementById('p2-email').value.trim();
+      const p2Phone = document.getElementById('p2-phone').value.trim();
+      const parent2 = (p2First || p2Last || p2Email || p2Phone)
+        ? { firstName: p2First, lastName: p2Last, email: p2Email, phone: p2Phone }
+        : null;
+
       const subscribeToMailingList = subscribeCheck.checked;
       const mailingListLists = Array.from(
         document.querySelectorAll('input[name="family-list"]:checked')
@@ -183,6 +203,7 @@
           method: 'POST',
           body: JSON.stringify({
             parent: { firstName: first, lastName: last, email, phone },
+            parent2,
             additionalContacts,
             children,
             subscribeToMailingList,

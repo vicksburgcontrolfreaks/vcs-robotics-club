@@ -22,7 +22,7 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.8.0';
+const BACKEND_VERSION = '2.9.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
@@ -91,6 +91,7 @@ function handleFamilySignup(data) {
   const sheet = getOrCreateSubmissionsSheet();
 
   const parent = data.parent || {};
+  const parent2 = data.parent2 || {};
   const children = data.children || [];
   const submittedAt = data.submittedAt || new Date().toISOString();
 
@@ -105,7 +106,15 @@ function handleFamilySignup(data) {
       + (c.phone ? ' | ' + c.phone : '');
   }).join('\n');
 
-  // One row per child (parent info repeated for easy filtering)
+  // One row per child (parent info repeated for easy filtering). Parent 2's
+  // fields are appended at the END of the row, after Interested Roles — never
+  // insert new fields in the middle of this array. The sheet's header row is
+  // only ever written once, when the sheet is first created (see
+  // getOrCreateSubmissionsSheet) — it's never rewritten for an existing
+  // sheet, so inserting a field here would silently shift every column after
+  // it out of alignment with its header label for every future row, with no
+  // error thrown. Appending at the end is always safe: old rows simply have
+  // blank cells in the new columns.
   children.forEach(function(child) {
     sheet.appendRow([
       submittedAt,
@@ -117,7 +126,11 @@ function handleFamilySignup(data) {
       child.name       || '',
       child.grade      || '',
       child.shirtSize  || '',
-      (child.roles || []).join(', ')
+      (child.roles || []).join(', '),
+      parent2.firstName || '',
+      parent2.lastName  || '',
+      parent2.email     || '',
+      parent2.phone     || ''
     ]);
   });
 
@@ -139,7 +152,8 @@ function getOrCreateSubmissionsSheet() {
     sheet.appendRow([
       'Submitted At', 'Parent First', 'Parent Last', 'Email', 'Phone',
       'Additional Contacts',
-      'Child Name', 'Grade', 'Shirt Size', 'Interested Roles'
+      'Child Name', 'Grade', 'Shirt Size', 'Interested Roles',
+      'Parent 2 First', 'Parent 2 Last', 'Parent 2 Email', 'Parent 2 Phone'
     ]);
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(1, 180); // timestamp
