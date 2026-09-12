@@ -606,10 +606,15 @@
   }
 
   function renderRoster() {
+    // Child's full name is never shown on screen either — first name + last
+    // initial only, same as the printed roster, so a child's full name isn't
+    // sitting in the rendered page (this admin page is only password-gated,
+    // not strong security). Parent name/email (adults, not minors) still show
+    // in full since that's who needs to be contacted.
     const tbody = document.querySelector('#rosterTable tbody');
     tbody.innerHTML = currentRoster.map(r => `
       <tr>
-        <td>${r.childName || ''}</td>
+        <td>${firstNameLastInitial(r.childName)}</td>
         <td>${r.grade || ''}</td>
         <td>${r.shirtSize || ''}</td>
         <td>${r.parentName || ''}</td>
@@ -646,6 +651,15 @@
       <div class="stat card"><div class="num">${counts[size]}</div><div class="label">${size}</div></div>
     `).join('') + (unspecified > 0
       ? `<div class="stat card"><div class="num">${unspecified}</div><div class="label">Not specified</div></div>`
+      : '');
+
+    // Same tally, printed — so shirt-ordering counts are on the paper copy
+    // too, not just the on-screen admin page.
+    const printTallyEl = document.getElementById('rosterPrintTally');
+    printTallyEl.innerHTML = tallyEntries.map(size => `
+      <div class="tally-box"><div class="num">${counts[size]}</div><div class="label">${size}</div></div>
+    `).join('') + (unspecified > 0
+      ? `<div class="tally-box"><div class="num">${unspecified}</div><div class="label">Not specified</div></div>`
       : '');
   }
 

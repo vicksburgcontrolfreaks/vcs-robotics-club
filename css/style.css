@@ -375,6 +375,17 @@ table th { color: var(--black); font-size: 12px; text-transform: uppercase; lett
    document flow and print extra blank pages below the roster table. */
 #rosterPrintArea { display: none; }
 
+#rosterPrintTally { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+#rosterPrintTally .tally-box {
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 5px 12px;
+  text-align: center;
+  min-width: 64px;
+}
+#rosterPrintTally .num { font-size: 17px; font-weight: bold; line-height: 1.1; }
+#rosterPrintTally .label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+
 #rosterPrintTable { width: 100%; border-collapse: collapse; }
 #rosterPrintTable th, #rosterPrintTable td {
   border: 1px solid #000;

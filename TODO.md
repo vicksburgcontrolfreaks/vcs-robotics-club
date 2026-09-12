@@ -193,6 +193,19 @@ page titles) no longer reads as FRC-8126-specific.
       several trailing blank pages — caught via Playwright (`body.scrollHeight` under
       `page.emulateMedia({media:'print'})` dropped from ~4970px to ~988px after the fix) rather than
       just eyeballing a screenshot.
+- [x] **Child names truncated on screen too.** The on-screen roster's Child column now also shows
+      first name + last initial only (same `firstNameLastInitial()` helper as the print table) —
+      avoids a child's full name sitting in the rendered admin page, which is only password-gated,
+      not strong security. Parent name/email (adults) still show in full since that's who needs
+      contacting. CSV export is unchanged (still full child name) — it's a private download for
+      actual shirt ordering/records, not something rendered on a page. Note: with only first-name +
+      last-initial, two same-grade/same-size kids with the same first name and last initial (e.g.
+      two "Connor R."s already exist on the live roster, different grades) are only distinguishable
+      by grade/size, not by name — acceptable for shirt handout at this scale, but worth knowing.
+- [x] **Shirt-size tally on the printed roster.** The same size-by-size count boxes shown above the
+      on-screen roster table (`#rosterSizeTally`) now also render at the top of the printed page
+      (`#rosterPrintTally` in admin.html / css/style.css), computed once in `renderRoster()` and
+      shared between both.
 
 - The `Subscribers` sheet already stays accurate on its own: people self-serve subscribe
   (join.html) and self-serve unsubscribe (one click from the confirmation/every email footer) —
