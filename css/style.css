@@ -375,6 +375,20 @@ table th { color: var(--black); font-size: 12px; text-transform: uppercase; lett
    document flow and print extra blank pages below the roster table. */
 #rosterPrintArea { display: none; }
 
+.print-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.print-logo { width: 60px; height: 60px; flex-shrink: 0; }
+
+/* Diagonal red/black accent bar, echoing the flyer-hero stripe pattern —
+   printer color forced on since some browsers otherwise drop CSS
+   backgrounds by default to save ink. */
+.print-stripe {
+  height: 8px;
+  margin: 10px 0 16px;
+  background: repeating-linear-gradient(135deg, var(--black) 0 14px, var(--red) 14px 28px);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 #rosterPrintTally { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 #rosterPrintTally .tally-box {
   border: 1px solid #000;

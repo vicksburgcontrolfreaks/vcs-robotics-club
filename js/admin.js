@@ -605,14 +605,24 @@
     return parts[0] + ' ' + parts[parts.length - 1].charAt(0).toUpperCase() + '.';
   }
 
+  // Sort by grade, in GRADES order (6th..12th); anything not in that list
+  // (blank/unrecognized) sorts to the end. Array.sort is stable, so kids
+  // within the same grade keep their original (submission) order.
+  function byGrade(a, b) {
+    const ai = GRADES.indexOf(a.grade); const bi = GRADES.indexOf(b.grade);
+    return (ai === -1 ? GRADES.length : ai) - (bi === -1 ? GRADES.length : bi);
+  }
+
   function renderRoster() {
+    const sortedRoster = currentRoster.slice().sort(byGrade);
+
     // Child's full name is never shown on screen either — first name + last
     // initial only, same as the printed roster, so a child's full name isn't
     // sitting in the rendered page (this admin page is only password-gated,
     // not strong security). Parent name/email (adults, not minors) still show
     // in full since that's who needs to be contacted.
     const tbody = document.querySelector('#rosterTable tbody');
-    tbody.innerHTML = currentRoster.map(r => `
+    tbody.innerHTML = sortedRoster.map(r => `
       <tr>
         <td>${firstNameLastInitial(r.childName)}</td>
         <td>${r.grade || ''}</td>
@@ -625,7 +635,7 @@
     // Separate, simpler print table: Grade / Name (first + last initial) /
     // Shirt Size / a blank "Paid" box — no roles, no parent/email.
     const printTbody = document.querySelector('#rosterPrintTable tbody');
-    printTbody.innerHTML = currentRoster.map(r => `
+    printTbody.innerHTML = sortedRoster.map(r => `
       <tr>
         <td>${r.grade || ''}</td>
         <td>${firstNameLastInitial(r.childName)}</td>
@@ -672,7 +682,8 @@
     const header = ['Child', 'Grade', 'Shirt Size', 'Parent', 'Email'];
     const escape = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
     const lines = [header.map(escape).join(',')].concat(
-      currentRoster.map(r => [r.childName, r.grade, r.shirtSize, r.parentName, r.email].map(escape).join(','))
+      currentRoster.slice().sort(byGrade)
+        .map(r => [r.childName, r.grade, r.shirtSize, r.parentName, r.email].map(escape).join(','))
     );
     const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
     const a = document.createElement('a');

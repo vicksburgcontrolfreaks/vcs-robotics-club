@@ -175,8 +175,14 @@
        #rosterPrintArea in css/style.css). Deliberately just these four
        columns — no roles, no parent/email. -->
   <div id="rosterPrintArea">
-    <h1 style="font-size:22px; margin:0 0 4px;">Vicksburg Robotics — Team Roster</h1>
-    <p style="font-size:13px; color:#333; margin:0 0 14px;">Control Freaks · printed <span id="rosterPrintDate"></span></p>
+    <div class="print-header">
+      <div>
+        <h1 style="font-size:22px; margin:0 0 4px;">Vicksburg Robotics — Team Roster</h1>
+        <p style="font-size:13px; color:#333; margin:0;">Control Freaks · printed <span id="rosterPrintDate"></span></p>
+      </div>
+      <img class="print-logo" src="img/control-freaks-logo.png" alt="Control Freaks logo">
+    </div>
+    <div class="print-stripe"></div>
     <div id="rosterPrintTally"></div>
     <table id="rosterPrintTable">
       <thead>

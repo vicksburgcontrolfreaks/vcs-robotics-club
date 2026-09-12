@@ -206,6 +206,14 @@ page titles) no longer reads as FRC-8126-specific.
       on-screen roster table (`#rosterSizeTally`) now also render at the top of the printed page
       (`#rosterPrintTally` in admin.html / css/style.css), computed once in `renderRoster()` and
       shared between both.
+- [x] **Roster ordered by grade.** Both the on-screen table, the printed table, and the CSV export
+      now sort by grade (`byGrade()` in js/admin.js, using `GRADES` order from js/config.js — unknown
+      grades sort last). Stable sort, so kids within the same grade keep their original order.
+- [x] **Printed roster header: logo + accent stripe.** `.print-header`/`.print-logo`/`.print-stripe`
+      in css/style.css — Control Freaks logo in the upper-right corner of the printed page, and a
+      diagonal red/black stripe bar underneath, echoing the flyer-hero pattern from
+      [flyer.html](flyer.html). Needed `print-color-adjust: exact` since browsers otherwise tend to
+      drop CSS background colors/gradients when printing to save ink.
 
 - The `Subscribers` sheet already stays accurate on its own: people self-serve subscribe
   (join.html) and self-serve unsubscribe (one click from the confirmation/every email footer) —
