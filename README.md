@@ -59,7 +59,14 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 
 ### Sheets
 
-- **Parent Submissions** — one row per child, from the full family sign-up form (pre-existing).
+- **Parent Submissions** — one row per child, from the full family sign-up form (pre-existing):
+  Submitted At, Parent First/Last/Email/Phone, Additional Contacts, Child Name/Grade/Shirt Size/
+  Interested Roles, then Parent 2 First/Last/Email/Phone appended at the end. **Important:**
+  `getOrCreateSubmissionsSheet()` only ever writes this header row once, the first time the sheet is
+  created — it never updates an existing sheet's header. So if a new field is ever added to this
+  row, it must be appended at the end of the array, never inserted in the middle, or every column
+  after it will silently drift out of alignment with its header label for every future row (this
+  happened for real — see TODO.md).
 - **Subscribers** — one row per mailing-list contact: name, email, unsubscribe token, status
   (`subscribed` / `unsubscribed`), source, timestamps, and a `Lists` column (comma-separated segment
   codes — see `LIST_OPTIONS` in [js/config.js](js/config.js): `elementary`, `middle`, `high`,

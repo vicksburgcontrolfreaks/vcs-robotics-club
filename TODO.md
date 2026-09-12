@@ -190,6 +190,34 @@ page titles) no longer reads as FRC-8126-specific.
   contact group / use for a mail merge. Re-export each time rather than keeping a stale Gmail
   group in sync by hand.
 
+## Parent Submissions fixes ✅ built — needs redeploy + one manual header edit
+
+- [x] **Second parent/guardian fields.** [join.html](join.html)'s family form
+      ([js/family-form.js](js/family-form.js)) now has an optional "Second parent / guardian" block
+      (first/last/email/phone) between the required Parent 1 fields and the emergency/pickup contact
+      button (renamed from "+ Add another contact person" to "+ Add another emergency/pickup contact"
+      to distinguish it from the second parent). Submitted as `parent2` (or `null` if left fully
+      blank). Backend: [apps-script/Code.gs](apps-script/Code.gs) `handleFamilySignup` appends
+      `parent2.firstName/lastName/email/phone` at the **end** of the Parent Submissions row (see the
+      comment there on why it must be the end, not inserted). Bumped to v2.9.0. Not yet surfaced in
+      the Roster admin table/CSV — `handleRosterAdmin` still only reads the original 8 fields;
+      revisit if you want Parent 2 visible/exportable there too.
+- [ ] **Manual fix needed: stale header row on the live "Parent Submissions" sheet.** Reported bug —
+      child name/grade/shirt size/role were showing up one column to the right of their header, with
+      Child Name appearing empty. Root cause: `getOrCreateSubmissionsSheet()` only ever writes the
+      header row once, the first time the sheet is created, and never updates it after that. The live
+      sheet's header was written back before the "Additional Contacts" column existed, so ever since
+      that column was added to the data-writing code, every column from Child Name onward has been
+      one cell right of its true header — **no data is missing or wrong**, it's purely a stale label
+      problem. One-time manual fix (do this in the actual Google Sheet, not in code — retyping row 1
+      doesn't touch any existing data rows):
+      1. Click cell **F1** and retype the header row from F onward as: `F1: Additional Contacts`,
+         `G1: Child Name`, `H1: Grade`, `I1: Shirt Size`, `J1: Interested Roles`.
+      2. While you're in there, add the four new Parent 2 headers right after: `K1: Parent 2 First`,
+         `L1: Parent 2 Last`, `M1: Parent 2 Email`, `N1: Parent 2 Phone`.
+      Do both in one pass. After this, every row (old and new) lines up with its header — old rows
+      just have blank cells in K–N since they predate the second-parent feature.
+
 ## Reference
 
 - **Join-page QR code** — see [scan-card.html](scan-card.html) (on-site, on-brand, print-ready). The
