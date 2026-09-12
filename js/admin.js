@@ -596,15 +596,41 @@
     }
   }
 
+  // "First Last" -> "First L." for the printable roster — first name plus
+  // last-initial only, no full last name on the printed sheet.
+  function firstNameLastInitial(fullName) {
+    const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '';
+    if (parts.length === 1) return parts[0];
+    return parts[0] + ' ' + parts[parts.length - 1].charAt(0).toUpperCase() + '.';
+  }
+
   function renderRoster() {
+    // Child's full name is never shown on screen either — first name + last
+    // initial only, same as the printed roster, so a child's full name isn't
+    // sitting in the rendered page (this admin page is only password-gated,
+    // not strong security). Parent name/email (adults, not minors) still show
+    // in full since that's who needs to be contacted.
     const tbody = document.querySelector('#rosterTable tbody');
     tbody.innerHTML = currentRoster.map(r => `
       <tr>
-        <td>${r.childName || ''}</td>
+        <td>${firstNameLastInitial(r.childName)}</td>
         <td>${r.grade || ''}</td>
         <td>${r.shirtSize || ''}</td>
         <td>${r.parentName || ''}</td>
         <td>${r.email || ''}</td>
+      </tr>
+    `).join('');
+
+    // Separate, simpler print table: Grade / Name (first + last initial) /
+    // Shirt Size / a blank "Paid" box — no roles, no parent/email.
+    const printTbody = document.querySelector('#rosterPrintTable tbody');
+    printTbody.innerHTML = currentRoster.map(r => `
+      <tr>
+        <td>${r.grade || ''}</td>
+        <td>${firstNameLastInitial(r.childName)}</td>
+        <td>${r.shirtSize || ''}</td>
+        <td class="paid-cell"><span class="paid-box"></span></td>
       </tr>
     `).join('');
 
@@ -626,7 +652,21 @@
     `).join('') + (unspecified > 0
       ? `<div class="stat card"><div class="num">${unspecified}</div><div class="label">Not specified</div></div>`
       : '');
+
+    // Same tally, printed — so shirt-ordering counts are on the paper copy
+    // too, not just the on-screen admin page.
+    const printTallyEl = document.getElementById('rosterPrintTally');
+    printTallyEl.innerHTML = tallyEntries.map(size => `
+      <div class="tally-box"><div class="num">${counts[size]}</div><div class="label">${size}</div></div>
+    `).join('') + (unspecified > 0
+      ? `<div class="tally-box"><div class="num">${unspecified}</div><div class="label">Not specified</div></div>`
+      : '');
   }
+
+  document.getElementById('rosterPrintBtn').addEventListener('click', () => {
+    document.getElementById('rosterPrintDate').textContent = new Date().toLocaleDateString();
+    window.print();
+  });
 
   document.getElementById('rosterExportBtn').addEventListener('click', () => {
     const header = ['Child', 'Grade', 'Shirt Size', 'Parent', 'Email'];

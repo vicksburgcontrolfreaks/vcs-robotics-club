@@ -181,6 +181,31 @@ page titles) no longer reads as FRC-8126-specific.
       admin AI-instructions placeholder example, and the live "Informational Meeting" post (which
       had already been AI-polished with a Discord QR + mention — fixed via direct API call back to
       a single mailing-list QR). `flyer.html` never had Discord content to begin with.
+- [x] **Printable roster.** New "Print roster" button next to the roster's "Download CSV" button
+      ([admin.html](admin.html) / [js/admin.js](js/admin.js)) prints a separate, simpler paper
+      table — just **Grade**, **Name** (first name + last initial, e.g. "Addisyn F.", via a new
+      `firstNameLastInitial()` helper), **Shirt Size**, and a blank outlined **Paid** box — no roles,
+      no parent/email. Rendered into a hidden `#rosterPrintArea` table alongside the on-screen roster
+      table. Print CSS ([css/style.css](css/style.css)) hides `.site-header`/`.site-footer`/the main
+      `.section` and shows just that table full-page; deliberately uses `display: none` on those
+      siblings rather than the more common `visibility: hidden` "print just this element" trick,
+      since `visibility: hidden` alone leaves their height in the document flow and was printing
+      several trailing blank pages — caught via Playwright (`body.scrollHeight` under
+      `page.emulateMedia({media:'print'})` dropped from ~4970px to ~988px after the fix) rather than
+      just eyeballing a screenshot.
+- [x] **Child names truncated on screen too.** The on-screen roster's Child column now also shows
+      first name + last initial only (same `firstNameLastInitial()` helper as the print table) —
+      avoids a child's full name sitting in the rendered admin page, which is only password-gated,
+      not strong security. Parent name/email (adults) still show in full since that's who needs
+      contacting. CSV export is unchanged (still full child name) — it's a private download for
+      actual shirt ordering/records, not something rendered on a page. Note: with only first-name +
+      last-initial, two same-grade/same-size kids with the same first name and last initial (e.g.
+      two "Connor R."s already exist on the live roster, different grades) are only distinguishable
+      by grade/size, not by name — acceptable for shirt handout at this scale, but worth knowing.
+- [x] **Shirt-size tally on the printed roster.** The same size-by-size count boxes shown above the
+      on-screen roster table (`#rosterSizeTally`) now also render at the top of the printed page
+      (`#rosterPrintTally` in admin.html / css/style.css), computed once in `renderRoster()` and
+      shared between both.
 
 - The `Subscribers` sheet already stays accurate on its own: people self-serve subscribe
   (join.html) and self-serve unsubscribe (one click from the confirmation/every email footer) —
