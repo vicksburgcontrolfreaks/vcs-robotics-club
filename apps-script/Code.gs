@@ -26,7 +26,7 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.10.0';
+const BACKEND_VERSION = '2.10.1';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
@@ -422,22 +422,39 @@ function handlePostDiscordAnnouncement(data) {
     .concat(['', link])
     .join('\n');
 
+  // Retry on 429 — Discord webhooks sit behind Cloudflare, and Google Apps
+  // Script's outbound IPs are shared across every Apps Script project
+  // everywhere, so a 429 (often Cloudflare's own "error code: 1015") can show
+  // up even on this script's very first-ever call. It's rarely this specific
+  // request's fault, so back off (honoring Retry-After when Discord sends
+  // one) and try a couple more times before giving up.
+  const maxAttempts = 3;
   let response;
-  try {
-    response = UrlFetchApp.fetch(webhookUrl, {
-      method: 'post',
-      contentType: 'application/json',
-      payload: JSON.stringify({ content: content }),
-      muteHttpExceptions: true
-    });
-  } catch (err) {
-    return jsonOut({ status: 'error', message: 'Could not reach Discord: ' + err.message });
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      response = UrlFetchApp.fetch(webhookUrl, {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify({ content: content }),
+        muteHttpExceptions: true
+      });
+    } catch (err) {
+      return jsonOut({ status: 'error', message: 'Could not reach Discord: ' + err.message });
+    }
+
+    if (response.getResponseCode() !== 429 || attempt === maxAttempts) break;
+    const headers = response.getHeaders() || {};
+    const retryAfterSec = Number(headers['Retry-After'] || headers['retry-after']) || 3;
+    Utilities.sleep(Math.min(retryAfterSec, 10) * 1000);
   }
 
   // Discord's webhook endpoint replies 204 No Content on success by default.
   const code = response.getResponseCode();
   if (code !== 200 && code !== 204) {
-    return jsonOut({ status: 'error', message: 'Discord error (' + code + '): ' + response.getContentText().slice(0, 300) });
+    const message = code === 429
+      ? 'Discord is rate-limiting requests from Google Apps Script right now (429 / "error code: 1015") — this is a shared limit across every Apps Script project hitting Discord, not something specific to this post. Wait a minute or two and try again.'
+      : 'Discord error (' + code + '): ' + response.getContentText().slice(0, 300);
+    return jsonOut({ status: 'error', message: message });
   }
 
   return jsonOut({ status: 'ok' });
