@@ -37,6 +37,32 @@ Nothing here is implemented yet — this is planning only.
       one-time pass to ask existing subscribers what they want, or just default them to "all teams"
       manually in the sheet.
 
+## Discord cross-posting ✅ built — needs redeploy + Script Property + Discord webhook (v2.10.0)
+
+- [x] **"Post to Discord" for High School posts.** [admin.html](admin.html) / [js/admin.js](js/admin.js)
+      — a new button next to "Compose announcement"/"Mark as announced" on each published post,
+      shown only when `audience === 'high'` (that's all that was asked for; nothing behind it is
+      High-School-specific, so showing it for other programs later is just loosening that check).
+      Confirms before posting (outward-facing, hard to take back). Backend:
+      [apps-script/Code.gs](apps-script/Code.gs) `handlePostDiscordAnnouncement()` looks the post up
+      by id and sends its title + summary bullets + a link back to its `updates-<program>.html#c-<id>`
+      anchor to a Discord Incoming Webhook (`DISCORD_WEBHOOK_URL` Script Property — optional, shows a
+      clear error if unset, same pattern as `ANTHROPIC_API_KEY`/AI polish). No new OAuth scope needed
+      — it's the same `UrlFetchApp` external-request permission already granted for the Anthropic
+      calls, just a different host. Bumped to v2.10.0.
+- [ ] **Redeploy + one-time Discord setup needed:** redeploy `Code.gs`, then in Discord create an
+      Incoming Webhook for the channel to post to (channel Settings → Integrations → Webhooks → New
+      Webhook → Copy Webhook URL) and paste it into the `DISCORD_WEBHOOK_URL` Script Property.
+
+## Point subscribers to the updates page ✅ built
+
+- [x] **Confirmation-screen signpost.** Both sign-up flows now point to [updates.html](updates.html)
+      right after the confirmation checkmark — [js/subscribe.js](js/subscribe.js)'s quick-subscribe
+      confirmation and [js/family-form.js](js/family-form.js)'s full family-form confirmation each
+      got a line of text plus a "View recent updates →" button. Specifically for people who arrive
+      via a QR code (scan-card.html/flyer.html) straight into a sign-up form and would otherwise have
+      no way to discover updates.html exists at all.
+
 ## New site pages
 
 - [ ] **Dedicated sponsor page.** The [join.html](join.html) card is just a CTA button; a full page

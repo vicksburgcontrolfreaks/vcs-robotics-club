@@ -63,6 +63,9 @@
         <span class="checkmark">✅</span>
         <h2>You're on the list!</h2>
         <p>Check your inbox for a confirmation email — it includes an unsubscribe link if you ever need it.</p>
+        <p class="muted" style="margin-bottom:6px;">You don't have to wait for an email — recent
+          posts for your program are already up any time you want to look.</p>
+        <a class="btn btn-gold" href="updates.html">View recent updates →</a>
       </div>
     `;
   }

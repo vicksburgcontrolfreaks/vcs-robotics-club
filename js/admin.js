@@ -365,13 +365,17 @@
               <strong>${c.title || ''}</strong>
               <div class="muted" style="font-size:12px;">${audienceLabel(c.audience)} · published ${fmtDate(c.publishedAt)}</div>
             </div>
-            ${c.announcedAt
-              ? `<span class="badge badge-subscribed">✓ Announced ${fmtDate(c.announcedAt)}</span>`
-              : `<div style="display:flex; gap:10px;">
-                   <button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
-                   <button type="button" class="btn btn-navy" data-announced-id="${c.id}">Mark as announced</button>
-                 </div>`
-            }
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              ${c.announcedAt
+                ? `<span class="badge badge-subscribed">✓ Announced ${fmtDate(c.announcedAt)}</span>`
+                : `<button type="button" class="btn btn-gold" data-comm-id="${c.id}">Compose announcement →</button>
+                   <button type="button" class="btn btn-navy" data-announced-id="${c.id}">Mark as announced</button>`
+              }
+              ${c.audience === 'high'
+                ? `<button type="button" class="btn btn-navy" data-discord-id="${c.id}">Post to Discord →</button>`
+                : ''
+              }
+            </div>
           </div>
         `).join('');
 
@@ -394,6 +398,39 @@
         const result = await res.json();
         if (result.status === 'ok') loadCommunications();
         else { alert(result.message || 'Could not update this post.'); btn.disabled = false; }
+      });
+    });
+
+    // "Post to Discord" is currently only offered for High School posts (that's
+    // all that was asked for) — nothing else here is High-School-specific, so
+    // showing it for other programs later is just loosening the filter above.
+    publishedEl.querySelectorAll('button[data-discord-id]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const comm = published.find(c => c.id === btn.getAttribute('data-discord-id'));
+        if (!comm) return;
+        if (!confirm('Post "' + (comm.title || '(untitled)') + '" to the Discord server now?')) return;
+        const originalLabel = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Posting…';
+        try {
+          const res = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'postDiscordAnnouncement', password: currentPassword, id: comm.id })
+          });
+          const result = await res.json();
+          if (result.status === 'ok') {
+            btn.textContent = 'Posted to Discord ✓';
+            setTimeout(() => { btn.textContent = originalLabel; btn.disabled = false; }, 2500);
+          } else {
+            alert(result.message || 'Could not post to Discord.');
+            btn.textContent = originalLabel;
+            btn.disabled = false;
+          }
+        } catch (err) {
+          alert('Something went wrong posting to Discord.');
+          btn.textContent = originalLabel;
+          btn.disabled = false;
+        }
       });
     });
   }

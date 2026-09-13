@@ -229,7 +229,12 @@
         <span class="checkmark">✅</span>
         <h2>You're in!</h2>
         <p>Thanks — your family's info has been saved.<br>We'll be in touch about the season.</p>
-        <button class="submit-btn" style="width:auto; padding:12px 24px;" onclick="location.reload()">Submit another family</button>
+        <p class="muted" style="margin-bottom:6px;">In the meantime, recent team communications are
+          posted here any time you want to check in.</p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <a class="btn btn-gold" href="updates.html">View recent updates →</a>
+          <button class="submit-btn" style="width:auto; padding:12px 24px; margin-top:0;" onclick="location.reload()">Submit another family</button>
+        </div>
       </div>
     `;
   }

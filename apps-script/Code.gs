@@ -8,6 +8,10 @@
 //   2. (Optional, for "Polish with AI" in the draft review panel) Script Properties → add
 //      ANTHROPIC_API_KEY = <an Anthropic API key>. Without it, the Polish button shows a clear
 //      error instead of failing silently; everything else works fine without it.
+//   2b. (Optional, for "Post to Discord" on published High School posts) In Discord:
+//      Server Settings → Integrations → Webhooks → New Webhook → pick the channel → Copy
+//      Webhook URL. Then Script Properties → add DISCORD_WEBHOOK_URL = <that URL>. Without it,
+//      the button shows a clear error instead of failing silently.
 //   3. Confirm SITE_URL below matches your GitHub Pages URL.
 //   4. Deploy → Manage deployments → edit the existing deployment → New version → Deploy.
 //      (Keeps the same /exec URL that's already pasted into parent_form.html.)
@@ -22,11 +26,19 @@
 const SUBMISSIONS_SHEET = 'Parent Submissions';
 const SUBSCRIBERS_SHEET = 'Subscribers';
 const COMMUNICATIONS_SHEET = 'Communications';
-const BACKEND_VERSION = '2.9.0';
+const BACKEND_VERSION = '2.10.0';
 // Audience codes shared with LIST_OPTIONS in js/config.js (elementary/middle/
 // high subscriber segments) plus 'lightweight' standing in for "Sponsors" —
 // every Communication is tagged with exactly one of these.
 const COMM_AUDIENCE_CODES = ['elementary', 'middle', 'high', 'lightweight'];
+// Mirrors the `page` field of COMM_AUDIENCES in js/config.js — needed here
+// too so handlePostDiscordAnnouncement can link back to the right public page.
+const AUDIENCE_PAGES = {
+  elementary:  'updates-elementary.html',
+  middle:      'updates-middle.html',
+  high:        'updates-high.html',
+  lightweight: 'updates-sponsors.html'
+};
 const SITE_URL = 'https://vicksburgcontrolfreaks.github.io/vcs-robotics-club/';
 const CLUB_NAME = 'Vicksburg Robotics (Control Freaks)';
 const CLAUDE_MODEL = 'claude-opus-5';
@@ -74,6 +86,10 @@ function doPost(e) {
 
     if (data.action === 'polishCommunication') {
       return handlePolishCommunication(data);
+    }
+
+    if (data.action === 'postDiscordAnnouncement') {
+      return handlePostDiscordAnnouncement(data);
     }
 
     // Legacy / family sign-up path — same shape parent_form.html has always sent.
@@ -364,6 +380,67 @@ function handleUpdateCommunication(data) {
   }
 
   return jsonOut({ status: 'error', message: 'Communication not found.' });
+}
+
+// Posts a published communication to Discord via an Incoming Webhook (set up
+// per-channel in Discord itself — see the setup note at the top of this
+// file). Only ever called from admin.html's "Post to Discord" button, which
+// today is only shown for High School posts — nothing here is High-School-
+// specific, so showing it for other programs later is just a UI change,
+// as long as DISCORD_WEBHOOK_URL points at a channel that makes sense for
+// all of them (or split into per-audience properties if that ever matters).
+function handlePostDiscordAnnouncement(data) {
+  const expected = PropertiesService.getScriptProperties().getProperty('ADMIN_PASSWORD');
+  if (!expected || data.password !== expected) {
+    return jsonOut({ status: 'error', message: 'Invalid password.' });
+  }
+
+  const webhookUrl = PropertiesService.getScriptProperties().getProperty('DISCORD_WEBHOOK_URL');
+  if (!webhookUrl) {
+    return jsonOut({ status: 'error', message: "Discord posting isn't configured yet — add a DISCORD_WEBHOOK_URL Script Property (see the setup note at the top of Code.gs)." });
+  }
+
+  const id = data.id;
+  if (!id) return jsonOut({ status: 'error', message: 'Missing communication ID.' });
+
+  const sheet = getOrCreateCommunicationsSheet();
+  const values = sheet.getDataRange().getValues();
+  let comm = null;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][0]) === String(id)) {
+      comm = { id: values[i][0], title: values[i][2], summary: values[i][4], audience: values[i][7] };
+      break;
+    }
+  }
+  if (!comm) return jsonOut({ status: 'error', message: 'Communication not found.' });
+
+  const page = AUDIENCE_PAGES[comm.audience] || 'updates.html';
+  const link = SITE_URL + page + '#c-' + comm.id;
+  const bulletLines = String(comm.summary || '').split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+  const content = ['📢 **' + comm.title + '**', '']
+    .concat(bulletLines.map(function (b) { return '• ' + b; }))
+    .concat(['', link])
+    .join('\n');
+
+  let response;
+  try {
+    response = UrlFetchApp.fetch(webhookUrl, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify({ content: content }),
+      muteHttpExceptions: true
+    });
+  } catch (err) {
+    return jsonOut({ status: 'error', message: 'Could not reach Discord: ' + err.message });
+  }
+
+  // Discord's webhook endpoint replies 204 No Content on success by default.
+  const code = response.getResponseCode();
+  if (code !== 200 && code !== 204) {
+    return jsonOut({ status: 'error', message: 'Discord error (' + code + '): ' + response.getContentText().slice(0, 300) });
+  }
+
+  return jsonOut({ status: 'ok' });
 }
 
 // Removes a row entirely — for stale/duplicate drafts, not a public "unpublish."

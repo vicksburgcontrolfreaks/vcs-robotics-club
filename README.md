@@ -50,6 +50,10 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
    - `ANTHROPIC_API_KEY` = an Anthropic API key (optional — powers the "✨ Polish with AI" button in
      the draft review panel; everything else works fine without it, the button just shows a clear
      error instead).
+   - `DISCORD_WEBHOOK_URL` = a Discord Incoming Webhook URL (optional — powers "Post to Discord" on
+     published High School posts; same as above, missing it just shows a clear error). In Discord:
+     the channel's Server Settings/Channel Settings → Integrations → Webhooks → New Webhook → Copy
+     Webhook URL.
 4. Confirm the `SITE_URL` constant at the top of `Code.gs` matches this site's GitHub Pages URL.
 5. **Deploy → Manage deployments** → edit the existing deployment → set a new version → Deploy.
    This keeps the same `/exec` URL already in use — no need to update `SCRIPT_URL` anywhere.
@@ -98,6 +102,7 @@ submission logic is unchanged, plus new mailing-list subscribe/unsubscribe/admin
 | Update communication | POST | `{ action: 'updateCommunication', password, id, title?, body?, summary?, status?, audience?, announcedAt? }` | Overwrites only the fields given; `status: 'published'` also stamps Published At. Used by admin.html's review/publish flow and by "Mark as announced" (sets `announcedAt`) |
 | Delete communication | POST | `{ action: 'deleteCommunication', password, id }` | Removes a Communications row entirely — for stale/duplicate drafts |
 | Polish communication | POST | `{ action: 'polishCommunication', password, title, body, audience, instructions? }` | Sends the draft to Claude (`claude-opus-5`) to copyedit and interpret intent, optionally following a free-form `instructions` note (e.g. "keep this to two short paragraphs") — returns `{ body, summary, notes }`; doesn't save anything itself. Requires `ANTHROPIC_API_KEY` |
+| Post Discord announcement | POST | `{ action: 'postDiscordAnnouncement', password, id }` | Looks up the published Communication by `id` and posts its title/summary/link to Discord via an Incoming Webhook. Requires `DISCORD_WEBHOOK_URL`. Only offered in admin.html for High School posts today (not audience-restricted server-side) |
 | Published communications | GET | `?action=publishedCommunications&audience=<code>` | Public, no password — only `published` rows, newest first, optionally scoped to one program. Powers each updates-<program>.html |
 | Communications admin | GET | `?action=communicationsAdmin&password=...` | All Communications rows (draft + published, every program), for admin.html's review lists |
 | Roster admin | GET | `?action=rosterAdmin&password=...` | Parent Submissions rows as JSON (child, grade, shirt size, parent, email) — one row per child, doubles as the shirt-order list |
@@ -118,10 +123,12 @@ instead of the container, which blows out the whole page width silently.
 
 Besides the subscriber list/export, admin.html also holds: quick links out to the join-page QR
 scan card and updates.html; a communications draft form with an in-browser review/edit/publish
-flow (live preview, plain-text auto-formatted into paragraphs) and per-draft delete (see
-Communications above); and the team roster with a shirt-size tally + CSV export, pulled straight
-from Parent Submissions. The roster also has a **Print roster** button producing a separate,
-simpler paper table (Grade / Name as first-name-plus-last-initial / Shirt Size / a blank "Paid"
+flow (live preview, plain-text auto-formatted into paragraphs), per-draft delete, and — for
+published **High School** posts only — a **Post to Discord** button that sends the title/summary/
+link straight to a Discord channel via `DISCORD_WEBHOOK_URL` (see Communications above); and the
+team roster with a shirt-size tally + CSV export, pulled straight from Parent Submissions. The
+roster also has a **Print roster** button producing a separate, simpler paper table (Grade / Name
+as first-name-plus-last-initial / Shirt Size / a blank "Paid"
 box, no roles or contact info) — see `#rosterPrintArea` in css/style.css and `js/admin.js`.
 
 ## Local development
