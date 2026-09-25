@@ -18,6 +18,9 @@ updates-elementary.html   Public archive, Elementary Robotics only
 updates-middle.html       Public archive, Middle School Robotics (FTC 5618 & 6494) only
 updates-high.html         Public archive, High School Robotics (FRC 8126) only
 updates-sponsors.html     Public archive, Sponsors (quarterly) only
+belt-pulley-solver.html   High School team resource — belt length / center distance / tooth
+                     count calculator, linked from updates-high.html. Self-contained, its own
+                     design (not css/style.css) — a working tool, not a marketing page.
 unsubscribe.html     Landing page for unsubscribe email links (?token=...)
 admin.html           Password-gated subscriber list, CSV export, communications posting (unlisted, not in nav)
 img/control-freaks-logo.png  Team logo, used in every page's header

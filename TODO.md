@@ -3,6 +3,22 @@
 Running backlog. Add to this whenever a new idea comes up; check items off as they're built.
 Nothing here is implemented yet — this is planning only.
 
+## Team resources ✅ built
+
+- [x] **Belt & Pulley Solver.** [belt-pulley-solver.html](belt-pulley-solver.html) — a High School
+      team engineering tool (exact belt length / center distance / pulley tooth count, open-belt
+      geometry, no small-angle approximation). Supplied as a finished, self-contained page — kept
+      its own design system (IBM Plex fonts, paper/steel/accent palette) rather than being forced
+      into css/style.css, since it's a working tool for the team, not a public marketing page.
+      Given a minimal "← Back to Vicksburg Robotics" link (styled to match its own look) pointing
+      to updates-high.html, and linked from a new "Team resources" card at the top of
+      [updates-high.html](updates-high.html) — that page is the natural home since High School
+      team members already land there from communications and the sign-up confirmation screens.
+      Opens in a new tab. No backend involved — pure client-side calculator, state kept in
+      localStorage only.
+- [ ] **More team resources may follow** — the "Team resources" card on updates-high.html is set up
+      to hold more than one link if/when there's a second tool; no redesign needed to add one.
+
 ## Sign-up form
 
 - [x] **Grades K–12, not just 6–12.** [js/config.js](js/config.js) `GRADES` extended to

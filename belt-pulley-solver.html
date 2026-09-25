@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Belt &amp; Pulley Solver — Vicksburg Robotics</title>
+<meta name="description" content="Exact open-belt-drive geometry calculator for FRC Team 8126 — belt length, center distance, and pulley tooth count.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#f5f2ea;
+    --ink:#211d16;
+    --steel:#726a58;
+    --steel-2:#9a9280;
+    --line:#ddd5c0;
+    --card:#fffdf8;
+    --accent:#c8531f;
+    --accent-ink:#ffffff;
+    --accent-soft:#f3ded1;
+    --accent2:#2c6e68;
+    --accent2-soft:#dbeae6;
+    --danger:#a8341f;
+    --good:#2c6e68;
+    --shadow: 0 1px 0 rgba(33,29,22,0.05), 0 8px 20px -14px rgba(33,29,22,0.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#16140f;
+      --ink:#ede6d8;
+      --steel:#b3a98f;
+      --steel-2:#7d7461;
+      --line:#3a3527;
+      --card:#1e1b14;
+      --accent:#e2814f;
+      --accent-ink:#1a0f06;
+      --accent-soft:#3a2a1c;
+      --accent2:#59b3a8;
+      --accent2-soft:#1e332f;
+      --danger:#e2695a;
+      --good:#59b3a8;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4), 0 8px 24px -14px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#16140f;
+    --ink:#ede6d8;
+    --steel:#b3a98f;
+    --steel-2:#7d7461;
+    --line:#3a3527;
+    --card:#1e1b14;
+    --accent:#e2814f;
+    --accent-ink:#1a0f06;
+    --accent-soft:#3a2a1c;
+    --accent2:#59b3a8;
+    --accent2-soft:#1e332f;
+    --danger:#e2695a;
+    --good:#59b3a8;
+    --shadow: 0 1px 0 rgba(0,0,0,0.4), 0 8px 24px -14px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  html, body{ height:auto; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    padding-inline:16px;
+    padding-block: 28px 60px;
+  }
+  .wrap{max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:22px;}
+
+  header.top{display:flex; flex-direction:column; gap:6px;}
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:600;
+  }
+  h1{font-size:26px; line-height:1.15; margin:0; font-weight:700; letter-spacing:-0.01em;}
+  .sub{color:var(--steel); font-size:14px; margin:0; max-width:56ch; line-height:1.5;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px 18px 20px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{
+    font-size:14px; margin:0 0 3px; font-weight:600;
+    display:flex; align-items:baseline; gap:8px;
+  }
+  .card h2 .tag{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600;
+    color:var(--accent2); background:var(--accent2-soft);
+    padding:2px 6px; border-radius:5px; letter-spacing:.04em;
+  }
+  .card p.hint{color:var(--steel); font-size:12.5px; margin:0 0 14px; line-height:1.5;}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media (max-width:520px){ .grid, .grid3{grid-template-columns:1fr;} }
+
+  label{display:block; font-size:12px; font-weight:600; color:var(--steel); margin-bottom:5px;}
+  label .unit{font-weight:400; color:var(--steel-2); font-family:"IBM Plex Mono",monospace;}
+
+  input[type=number], input[type=text], select{
+    width:100%;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:15px;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  input:focus, select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .field-readout{
+    margin-top:6px; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--steel);
+  }
+
+  .row-two{display:flex; align-items:center; gap:10px;}
+
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .chip{
+    font-family:"IBM Plex Mono",monospace; font-size:12px;
+    border:1px solid var(--line); background:var(--paper); color:var(--ink);
+    border-radius:999px; padding:4px 10px; cursor:pointer;
+  }
+  .chip:hover{border-color:var(--accent); color:var(--accent);}
+
+  .result-lead{
+    display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap;
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--line);
+  }
+  .result-lead .num{
+    font-family:"IBM Plex Mono",monospace; font-size:34px; font-weight:600;
+    line-height:1; color:var(--accent); font-variant-numeric: tabular-nums;
+  }
+  .result-lead .num.alt{ color:var(--accent2); }
+  .result-lead .num-unit{font-size:15px; color:var(--steel); margin-left:2px; font-weight:400;}
+  .result-lead .cap{font-size:12px; color:var(--steel); margin-bottom:6px;}
+
+  .note-line{font-size:12.5px; color:var(--steel); margin-top:8px; line-height:1.5;}
+  .note-line b{color:var(--ink); font-weight:600;}
+  .note-line.warn{color:var(--danger);}
+  .note-line.good{color:var(--good);}
+
+  table{width:100%; border-collapse:collapse; margin-top:12px; font-size:13px;}
+  th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--steel); font-weight:600; padding:6px 8px; border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:7px 8px; border-bottom:1px solid var(--line);
+    font-family:"IBM Plex Mono",monospace; font-variant-numeric: tabular-nums;
+  }
+  tr.exact td{ color:var(--good); font-weight:600; }
+  tr.exact td:first-child::after{ content:" ✓"; }
+  .tbl-wrap{overflow-x:auto;}
+
+  a.part-link{ color:var(--accent2); text-decoration:none; border-bottom:1px dotted currentColor; }
+  a.part-link.confirmed{ border-bottom-style:solid; }
+  a.part-link:hover{ color:var(--accent); }
+  .link-legend{ display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; font-size:11.5px; color:var(--steel); }
+  .link-legend span{ white-space:nowrap; }
+  .link-legend .swatch{ border-bottom:1px dotted var(--steel); }
+  .link-legend .swatch.confirmed{ border-bottom-style:solid; }
+
+  .chip-wrap{
+    display:inline-flex; align-items:stretch; border:1px solid var(--line);
+    border-radius:999px; overflow:hidden;
+  }
+  .chip-wrap .chip{ border:none; border-radius:0; }
+  .chip-wrap .chip-link{
+    display:flex; align-items:center; padding:0 9px;
+    font-family:"IBM Plex Mono",monospace; font-size:12px;
+    color:var(--steel); text-decoration:none; border-left:1px solid var(--line);
+  }
+  .chip-wrap .chip-link:hover{ color:var(--accent); background:var(--accent-soft); }
+
+  .toggle{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; width:fit-content;}
+  .toggle button{
+    font-family:"IBM Plex Mono",monospace; font-size:12.5px; padding:7px 12px;
+    background:var(--paper); color:var(--steel); border:none; cursor:pointer;
+  }
+  .toggle button.active{ background:var(--accent); color:var(--accent-ink); font-weight:600; }
+
+  .apply-btn{
+    font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
+    background:var(--accent2); color:#fff; border:none; border-radius:7px;
+    padding:8px 12px; cursor:pointer; margin-top:10px;
+  }
+  .apply-btn:hover{ opacity:.9; }
+  .apply-btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  svg text{ font-family:"IBM Plex Mono", monospace; fill:var(--steel); }
+  .schem-wrap{overflow-x:auto;}
+
+  footer{
+    font-size:12px; color:var(--steel-2); line-height:1.6; padding-top:8px;
+  }
+  footer a{ color:var(--accent2); text-decoration:none; border-bottom:1px solid currentColor; }
+
+  .back-link{
+    font-family:"IBM Plex Mono", monospace; font-size:12px; color:var(--steel);
+    text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+  }
+  .back-link:hover{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a class="back-link" href="updates-high.html">← Back to Vicksburg Robotics</a>
+
+  <header class="top">
+    <div class="eyebrow">Timing belt / pulley geometry</div>
+    <h1>Belt &amp; Pulley Solver</h1>
+    <p class="sub">Exact open-belt-drive math (no small-angle approximation) for two pulleys of any tooth count. Change the teeth or belt below and every panel updates.</p>
+  </header>
+
+  <!-- PULLEYS & PITCH -->
+  <section class="card">
+    <h2>Pulleys &amp; pitch</h2>
+    <p class="hint">Pitch diameter D = N·P / π. Reduction ratio is Pulley A : Pulley B.</p>
+    <div class="grid3">
+      <div>
+        <label for="n1">Pulley A teeth <span class="unit">N</span></label>
+        <input type="number" id="n1" min="6" step="1" value="25">
+        <div class="field-readout" id="d1out">⌀ — mm</div>
+      </div>
+      <div>
+        <label for="n2">Pulley B teeth <span class="unit">N</span></label>
+        <input type="number" id="n2" min="6" step="1" value="25">
+        <div class="field-readout" id="d2out">⌀ — mm</div>
+      </div>
+      <div>
+        <label for="pitch">Pitch / profile</label>
+        <select id="pitch">
+          <option value="2">2 mm — GT2</option>
+          <option value="3">3 mm — GT2 / 3M</option>
+          <option value="5" selected>5 mm — GT2 / HTD 5M</option>
+          <option value="8">8 mm — HTD 8M</option>
+          <option value="14">14 mm — HTD 14M</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <div class="field-readout" id="pitchCustomWrap" style="display:none; margin-top:8px;">
+          <input type="number" id="pitchCustom" min="0.5" step="0.1" value="5">
+        </div>
+      </div>
+    </div>
+    <div class="row-two" style="margin-top:14px;">
+      <div style="flex:1;">
+        <label for="widthLabel">Belt width label <span class="unit">(part-number text only, doesn't affect math)</span></label>
+        <input type="text" id="widthLabel" value="09" style="max-width:120px;">
+      </div>
+      <div class="note-line" id="ratioOut" style="margin-top:18px;"></div>
+    </div>
+  </section>
+
+  <!-- SCHEMATIC -->
+  <section class="card">
+    <h2>Schematic <span class="tag">not to scale-locked</span></h2>
+    <p class="hint">Drawn from Pulley A/B and the target center distance in the panel below. Larger pulley is always drawn on the left.</p>
+    <div class="schem-wrap">
+      <svg id="schem" viewBox="0 0 640 220" width="100%" height="220" role="img" aria-label="Two pulleys with belt, center distance and wrap angle"></svg>
+    </div>
+  </section>
+
+  <!-- CARD A -->
+  <section class="card">
+    <h2>Belt length for a target center distance <span class="tag">C → L</span></h2>
+    <p class="hint">Enter the center distance your frame needs. Shows the exact belt length, plus the nearest whole-tooth belts you could actually buy.</p>
+    <div class="grid">
+      <div>
+        <label for="aCD">Target center distance <span class="unit">mm</span></label>
+        <input type="number" id="aCD" min="1" step="0.5" value="85">
+      </div>
+    </div>
+
+    <div class="result-lead">
+      <div>
+        <div class="cap">Exact belt length</div>
+        <span class="num" id="aLenOut">—</span><span class="num-unit">mm</span>
+      </div>
+      <div>
+        <div class="cap">Exact tooth count</div>
+        <span class="num alt" id="aTeethOut">—</span><span class="num-unit">teeth</span>
+      </div>
+    </div>
+    <div class="note-line" id="aExactNote"></div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Teeth</th><th>Belt length</th><th>Part no.</th><th>Resulting CD</th><th>Δ from target</th></tr></thead>
+        <tbody id="aTable"></tbody>
+      </table>
+    </div>
+    <div class="link-legend" id="aLinkLegend" style="display:none;">
+      <span><span class="swatch confirmed">solid underline</span> — confirmed product page</span>
+      <span><span class="swatch">dotted ⌕</span> — search link; that exact length may not be stocked</span>
+    </div>
+  </section>
+
+  <!-- CARD B -->
+  <section class="card">
+    <h2>Center distance for a chosen belt <span class="tag">L → C</span></h2>
+    <p class="hint">Enter (or pick) a belt length you actually have or can buy, and see the center distance it forces. Click a chip to use that length, or its ↗ to open that belt's V-Belt Guys page.</p>
+    <div class="grid">
+      <div>
+        <label for="bLen">Belt length <span class="unit">mm</span></label>
+        <input type="number" id="bLen" min="10" step="5" value="300">
+        <div class="chips" id="bChips"></div>
+      </div>
+    </div>
+
+    <div class="result-lead">
+      <div>
+        <div class="cap">Center distance</div>
+        <span class="num" id="bCDOut">—</span><span class="num-unit">mm</span>
+      </div>
+    </div>
+    <div class="note-line" id="bTeethNote"></div>
+    <div class="note-line" id="bWrapNote"></div>
+  </section>
+
+  <!-- CARD C -->
+  <section class="card">
+    <h2>Solve the other pulley's teeth <span class="tag">C + L → N</span></h2>
+    <p class="hint">Frame center distance is fixed and you've already got a belt — find the tooth count the other pulley needs, then apply it back to Pulleys A/B above.</p>
+
+    <div class="row-two" style="margin-bottom:14px;">
+      <label style="margin:0;">Solve for</label>
+      <div class="toggle" id="cSolveToggle">
+        <button data-side="A" type="button">Pulley A</button>
+        <button data-side="B" type="button" class="active">Pulley B</button>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div>
+        <label for="cCD">Center distance <span class="unit">mm</span></label>
+        <input type="number" id="cCD" min="1" step="0.5" value="85">
+      </div>
+      <div>
+        <label for="cLen">Belt length <span class="unit">mm</span></label>
+        <input type="number" id="cLen" min="10" step="5" value="300">
+      </div>
+      <div>
+        <label for="cKnownTeeth">Known pulley teeth <span class="unit" id="cKnownLbl">(A)</span></label>
+        <input type="number" id="cKnownTeeth" min="6" step="1" value="25">
+      </div>
+    </div>
+
+    <div class="result-lead">
+      <div>
+        <div class="cap">Exact teeth needed<span id="cSolveForLbl2"> (B)</span></div>
+        <span class="num" id="cExactOut">—</span><span class="num-unit">teeth</span>
+      </div>
+    </div>
+    <div class="note-line" id="cInvalidNote" class="warn"></div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Teeth</th><th>Resulting CD</th><th>Δ from target</th><th></th></tr></thead>
+        <tbody id="cTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Formulas use the exact open-belt tangent/wrap-angle geometry (θ = asin((r₁−r₂)/C); L = 2C·cosθ + r_L(π+2θ) + r_S(π−2θ)), not the linear center-distance approximation — it's exact even when the two pulleys are very different sizes.
+    Stock-length chips reflect 5M-09 (5&nbsp;mm HTD, 9&nbsp;mm wide) belt listings confirmed at V-Belt Guys, e.g. <a href="https://www.vbeltguys.com/products/300-5m-09-synchronous-timing-belt" target="_blank" rel="noopener">300-5M-09</a> — always confirm current stock before ordering. Inputs are kept in this browser only.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ---------- core geometry ----------
+  function pitchDiameter(N, P){ return N * P / Math.PI; }
+
+  function beltLengthFromCD(C, r1, r2){
+    var rl = Math.max(r1, r2), rs = Math.min(r1, r2);
+    if (C <= (rl - rs)) return null;
+    var theta = Math.asin((rl - rs) / C);
+    return 2 * C * Math.cos(theta) + rl * (Math.PI + 2 * theta) + rs * (Math.PI - 2 * theta);
+  }
+
+  function cdFromBeltLength(L, r1, r2){
+    var rl = Math.max(r1, r2), rs = Math.min(r1, r2);
+    var lo = (rl - rs) + Math.max((rl - rs) * 1e-6, 1e-6);
+    var hi = Math.max(lo * 2, L);
+    var guard = 0;
+    while (guard < 200) {
+      var Lhi = beltLengthFromCD(hi, r1, r2);
+      if (Lhi === null || Lhi < L) { hi *= 2; guard++; } else break;
+    }
+    for (var i = 0; i < 90; i++) {
+      var mid = (lo + hi) / 2;
+      var Lm = beltLengthFromCD(mid, r1, r2);
+      if (Lm === null || Lm < L) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // solve r2 given C, r1, target L (monotonic increasing in r2 over valid domain)
+  function otherRadiusFromCD_L(C, rKnown, L, knownIsLarger){
+    var lo = 1e-6;
+    var hi = Math.max(rKnown * 4, C * 4, 50);
+    var guard = 0;
+    function f(r){ return beltLengthFromCD(C, rKnown, r); }
+    while (guard < 200) {
+      var v = f(hi);
+      if (v === null || v < L) { hi *= 1.6; guard++; } else break;
+    }
+    var vLo = f(lo);
+    if (vLo !== null && vLo > L) return null; // no valid solution even at r->0
+    for (var i = 0; i < 90; i++) {
+      var mid = (lo + hi) / 2;
+      var vm = f(mid);
+      if (vm === null || vm < L) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  function wrapAngleSmallDeg(C, r1, r2){
+    var rl = Math.max(r1, r2), rs = Math.min(r1, r2);
+    if (C <= (rl - rs)) return null;
+    var theta = Math.asin((rl - rs) / C);
+    var wrapRad = Math.PI - 2 * theta;
+    return wrapRad * 180 / Math.PI;
+  }
+
+  function fmt(x, d){
+    if (x === null || x === undefined || isNaN(x)) return "—";
+    return x.toFixed(d === undefined ? 2 : d);
+  }
+  function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=b; b=a%b; a=t; } return a||1; }
+
+  // ---------- state / persistence ----------
+  var STORE_KEY = "belt-pulley-solver-v1";
+  function saveState(){
+    try{
+      var s = {
+        n1: $("n1").value, n2: $("n2").value, pitch: $("pitch").value, pitchCustom: $("pitchCustom").value,
+        widthLabel: $("widthLabel").value,
+        aCD: $("aCD").value, bLen: $("bLen").value,
+        cCD: $("cCD").value, cLen: $("cLen").value, cKnown: $("cKnownTeeth").value, cSide: cSolveSide
+      };
+      localStorage.setItem(STORE_KEY, JSON.stringify(s));
+    }catch(e){ /* storage unavailable — ignore */ }
+  }
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return;
+      var s = JSON.parse(raw);
+      if(!s) return;
+      if(s.n1) $("n1").value = s.n1;
+      if(s.n2) $("n2").value = s.n2;
+      if(s.pitch) $("pitch").value = s.pitch;
+      if(s.pitchCustom) $("pitchCustom").value = s.pitchCustom;
+      if(s.widthLabel) $("widthLabel").value = s.widthLabel;
+      if(s.aCD) $("aCD").value = s.aCD;
+      if(s.bLen) $("bLen").value = s.bLen;
+      if(s.cCD) $("cCD").value = s.cCD;
+      if(s.cLen) $("cLen").value = s.cLen;
+      if(s.cKnown) $("cKnownTeeth").value = s.cKnown;
+      if(s.cSide) cSolveSide = s.cSide;
+    }catch(e){ /* ignore */ }
+  }
+
+  // ---------- stock chip reference (confirmed V-Belt Guys 5M-09 listings) ----------
+  var STOCK_5M09 = [200,225,245,275,300,325,415,460,485,965];
+  var CONFIRMED_5M09 = {};
+  STOCK_5M09.forEach(function(len){
+    CONFIRMED_5M09[len] = "https://www.vbeltguys.com/products/" + len + "-5m-09-synchronous-timing-belt";
+  });
+
+  // Builds the part-number cell: a solid link when we've confirmed that exact
+  // product page exists, otherwise a dotted link to a site search for it
+  // (that length may or may not actually be stocked — always confirm before ordering).
+  function partNumberInfo(P, lengthMm, width){
+    var profileLabel = (P === Math.round(P) ? P : P.toFixed(1)) + "M";
+    var lenInt = Math.round(lengthMm);
+    var text = lenInt + "-" + profileLabel + (width ? "-" + width : "");
+    var info = { text: text, url: null, confirmed: false };
+    if (P === 5 && width === "09") {
+      if (CONFIRMED_5M09[lenInt]) {
+        info.url = CONFIRMED_5M09[lenInt];
+        info.confirmed = true;
+      } else {
+        info.url = "https://www.vbeltguys.com/search?q=" + encodeURIComponent(lenInt + "-5M-09");
+        info.confirmed = false;
+      }
+    }
+    return info;
+  }
+
+  function currentPitch(){
+    var v = $("pitch").value;
+    if (v === "custom") {
+      var c = parseFloat($("pitchCustom").value);
+      return (c && c > 0) ? c : 5;
+    }
+    return parseFloat(v);
+  }
+
+  function buildChips(){
+    var wrap = $("bChips");
+    wrap.innerHTML = "";
+    if (currentPitch() !== 5) return;
+    STOCK_5M09.forEach(function(len){
+      var wrapEl = document.createElement("span");
+      wrapEl.className = "chip-wrap";
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip";
+      b.textContent = len + " mm";
+      b.title = "Use this belt length";
+      b.addEventListener("click", function(){ $("bLen").value = len; recalc(); });
+      var a = document.createElement("a");
+      a.href = CONFIRMED_5M09[len]; a.target = "_blank"; a.rel = "noopener";
+      a.className = "chip-link"; a.title = "Open this belt's product page";
+      a.textContent = "↗";
+      wrapEl.appendChild(b); wrapEl.appendChild(a);
+      wrap.appendChild(wrapEl);
+    });
+  }
+
+  $("pitch").addEventListener("change", function(){
+    $("pitchCustomWrap").style.display = (this.value === "custom") ? "block" : "none";
+    buildChips();
+    recalc();
+  });
+
+  var cSolveSide = "B";
+  $("cSolveToggle").addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-side]");
+    if(!btn) return;
+    cSolveSide = btn.getAttribute("data-side");
+    Array.prototype.forEach.call($("cSolveToggle").querySelectorAll("button"), function(b){
+      b.classList.toggle("active", b === btn);
+    });
+    recalc();
+  });
+
+  // ---------- schematic ----------
+  function drawSchematic(P, N1, N2, C){
+    var svg = $("schem");
+    var D1 = pitchDiameter(N1, P), D2 = pitchDiameter(N2, P);
+    var r1 = D1/2, r2 = D2/2;
+    var rl = Math.max(r1,r2), rs = Math.min(r1,r2);
+
+    var W = 640, H = 220, padX = 70;
+    var usable = W - padX*2;
+    var scale, cdShown = C;
+    var minC = rl - rs + Math.max(0.02*rl, 0.5);
+    if (C === null || isNaN(C) || C < minC) cdShown = minC * 1.15;
+
+    scale = usable / Math.max(cdShown + rl + rs, 1);
+    var cx1 = padX + rl*scale, cy = H/2, cx2 = cx1 + cdShown*scale;
+    var R1 = rl*scale, R2 = rs*scale;
+
+    var alpha = Math.asin( Math.min(0.999999, (rl-rs)/cdShown) );
+    var t1x = cx1 - R1*Math.sin(alpha), t1y = cy - R1*Math.cos(alpha);
+    var t2x = cx2 - R2*Math.sin(alpha), t2y = cy - R2*Math.cos(alpha);
+    var b1x = cx1 + R1*Math.sin(alpha), b1y = cy + R1*Math.cos(alpha);
+    var b2x = cx2 + R2*Math.sin(alpha), b2y = cy + R2*Math.cos(alpha);
+
+    var ink = "var(--ink)", steel = "var(--steel)", accent = "var(--accent)", line = "var(--line)";
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    function el(tag, attrs){
+      var e = document.createElementNS(svgNS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    svg.appendChild(el("circle",{cx:cx1,cy:cy,r:R1, fill:"none", stroke:accent, "stroke-width":2.5}));
+    svg.appendChild(el("circle",{cx:cx2,cy:cy,r:R2, fill:"none", stroke:"var(--accent2)", "stroke-width":2.5}));
+    svg.appendChild(el("circle",{cx:cx1,cy:cy,r:2.5, fill:steel}));
+    svg.appendChild(el("circle",{cx:cx2,cy:cy,r:2.5, fill:steel}));
+
+    svg.appendChild(el("line",{x1:t1x,y1:t1y,x2:t2x,y2:t2y, stroke:ink, "stroke-width":2}));
+    svg.appendChild(el("line",{x1:b1x,y1:b1y,x2:b2x,y2:b2y, stroke:ink, "stroke-width":2}));
+
+    var dimY = H - 24;
+    svg.appendChild(el("line",{x1:cx1,y1:cy,x2:cx1,y2:dimY, stroke:line, "stroke-width":1, "stroke-dasharray":"3,3"}));
+    svg.appendChild(el("line",{x1:cx2,y1:cy,x2:cx2,y2:dimY, stroke:line, "stroke-width":1, "stroke-dasharray":"3,3"}));
+    svg.appendChild(el("line",{x1:cx1,y1:dimY,x2:cx2,y2:dimY, stroke:steel, "stroke-width":1.2}));
+    var cdLabel = el("text",{x:(cx1+cx2)/2, y:dimY+16, "text-anchor":"middle", "font-size":12});
+    cdLabel.textContent = "C = " + (C && C>0 ? C.toFixed(1) : "—") + " mm";
+    svg.appendChild(cdLabel);
+
+    var l1 = el("text",{x:cx1, y:cy - R1 - 10, "text-anchor":"middle", "font-size":12});
+    l1.textContent = "A · N=" + N1 + " · ⌀" + (2*rl).toFixed(1);
+    svg.appendChild(l1);
+    var l2 = el("text",{x:cx2, y:cy - R2 - 10, "text-anchor":"middle", "font-size":12});
+    l2.textContent = "B · N=" + (r1>=r2 ? N2 : N1) + " · ⌀" + (2*rs).toFixed(1);
+    svg.appendChild(l2);
+  }
+
+  // ---------- main recalc ----------
+  function recalc(){
+    var N1 = parseFloat($("n1").value) || 0;
+    var N2 = parseFloat($("n2").value) || 0;
+    var P = currentPitch();
+    var D1 = pitchDiameter(N1, P), D2 = pitchDiameter(N2, P);
+    var r1 = D1/2, r2 = D2/2;
+    var width = $("widthLabel").value.trim() || "";
+    var profileLabel = (P === Math.round(P) ? P : P.toFixed(1)) + "M";
+
+    $("d1out").textContent = "⌀ " + fmt(D1,2) + " mm";
+    $("d2out").textContent = "⌀ " + fmt(D2,2) + " mm";
+
+    var g = gcd(Math.round(N1), Math.round(N2));
+    $("ratioOut").innerHTML = "<b>Ratio A:B</b> = " + N1 + ":" + N2 +
+      (g>1 ? "  (" + Math.round(N1/g) + ":" + Math.round(N2/g) + " simplified)" : "");
+
+    // ---- Card A: CD -> L ----
+    var targetCD = parseFloat($("aCD").value);
+    var minCD = Math.abs(r1-r2);
+    var aTable = $("aTable");
+    aTable.innerHTML = "";
+    if (!targetCD || targetCD <= minCD) {
+      $("aLenOut").textContent = "—"; $("aTeethOut").textContent = "—";
+      $("aExactNote").textContent = "Center distance must be greater than |D1−D2|/2 (" + fmt(minCD,2) + " mm) for these pulleys.";
+      $("aExactNote").className = "note-line warn";
+    } else {
+      var Lexact = beltLengthFromCD(targetCD, r1, r2);
+      var teethExact = Lexact / P;
+      $("aLenOut").textContent = fmt(Lexact,2);
+      $("aTeethOut").textContent = fmt(teethExact,3);
+      var nearInt = Math.abs(teethExact - Math.round(teethExact)) < 0.01;
+      if (nearInt) {
+        $("aExactNote").textContent = "Rounds essentially to a whole belt tooth count — see the exact row below.";
+        $("aExactNote").className = "note-line good";
+      } else {
+        $("aExactNote").textContent = "No stock belt hits this exactly — pick from the nearby whole-tooth options below (or nudge the pulley teeth in Card C).";
+        $("aExactNote").className = "note-line";
+      }
+      var baseTeeth = Math.round(teethExact);
+      for (var dt = -2; dt <= 2; dt++) {
+        var t = baseTeeth + dt;
+        if (t < 6) continue;
+        var Lc = t * P;
+        var CDc = cdFromBeltLength(Lc, r1, r2);
+        var delta = CDc - targetCD;
+        var tr = document.createElement("tr");
+        if (Math.abs(t - teethExact) < 0.02) tr.className = "exact";
+        var pinfo = partNumberInfo(P, Lc, width);
+        var partCell = pinfo.url
+          ? "<a href='" + pinfo.url + "' target='_blank' rel='noopener' class='part-link" + (pinfo.confirmed ? " confirmed" : "") + "'>" + pinfo.text + (pinfo.confirmed ? "" : " ⌕") + "</a>"
+          : pinfo.text;
+        tr.innerHTML = "<td>" + t + "</td><td>" + fmt(Lc,1) + " mm</td><td>" + partCell + "</td><td>" + fmt(CDc,2) + " mm</td><td>" + (delta>=0?"+":"") + fmt(delta,2) + " mm</td>";
+        aTable.appendChild(tr);
+      }
+      $("aLinkLegend").style.display = "flex";
+    }
+    if (!targetCD || targetCD <= minCD) {
+      $("aLinkLegend").style.display = "none";
+    }
+
+    // ---- Card B: L -> CD ----
+    var Lgiven = parseFloat($("bLen").value);
+    if (!Lgiven || Lgiven <= 0) {
+      $("bCDOut").textContent = "—"; $("bTeethNote").textContent=""; $("bWrapNote").textContent="";
+    } else {
+      var CDb = cdFromBeltLength(Lgiven, r1, r2);
+      $("bCDOut").textContent = fmt(CDb,2);
+      var teethB = Lgiven / P;
+      var teethBInt = Math.abs(teethB - Math.round(teethB)) < 0.01;
+      $("bTeethNote").innerHTML = "<b>" + fmt(teethB,2) + "</b> teeth at this pitch" + (teethBInt ? "" : " — not a whole number; this length isn't a clean fit for a " + profileLabel + " belt at this pitch.");
+      $("bTeethNote").className = "note-line" + (teethBInt ? "" : " warn");
+      var wrapDeg = wrapAngleSmallDeg(CDb, r1, r2);
+      if (wrapDeg !== null) {
+        $("bWrapNote").innerHTML = "Smaller pulley wrap angle: <b>" + fmt(wrapDeg,1) + "°</b>" + (wrapDeg < 120 ? " — tight wrap, watch for tooth jump / slip under load." : "");
+        $("bWrapNote").className = "note-line" + (wrapDeg < 120 ? " warn" : "");
+      }
+    }
+
+    // ---- Card C: solve teeth ----
+    $("cKnownLbl").textContent = "(" + (cSolveSide === "B" ? "A" : "B") + ")";
+    $("cSolveForLbl2").textContent = " (" + cSolveSide + ")";
+    document.querySelector('label[for="cKnownTeeth"]').firstChild.textContent = "Known pulley teeth ";
+
+    var cCD = parseFloat($("cCD").value);
+    var cLen = parseFloat($("cLen").value);
+    var cKnownN = parseFloat($("cKnownTeeth").value);
+    var cTable = $("cTable");
+    cTable.innerHTML = "";
+    var invalidEl = $("cInvalidNote");
+    invalidEl.textContent = ""; invalidEl.className = "note-line";
+
+    if (!cCD || !cLen || !cKnownN || cCD <= 0 || cLen <= 0 || cKnownN <= 0) {
+      $("cExactOut").textContent = "—";
+    } else {
+      var rKnown = pitchDiameter(cKnownN, P) / 2;
+      var rOther = otherRadiusFromCD_L(cCD, rKnown, cLen, null);
+      if (rOther === null) {
+        $("cExactOut").textContent = "—";
+        invalidEl.textContent = "No pulley size satisfies this belt length at this center distance with the known pulley given — try a longer belt or a larger center distance.";
+        invalidEl.className = "note-line warn";
+      } else {
+        var nOtherExact = (rOther * 2 * Math.PI) / P;
+        $("cExactOut").textContent = fmt(nOtherExact,3);
+        var baseN = Math.max(6, Math.round(nOtherExact));
+        for (var dn = -2; dn <= 2; dn++) {
+          var nCand = baseN + dn;
+          if (nCand < 6) continue;
+          var rCand = pitchDiameter(nCand, P)/2;
+          var rA = (cSolveSide === "B") ? rKnown : rCand;
+          var rB = (cSolveSide === "B") ? rCand : rKnown;
+          var CDcand = cdFromBeltLength(cLen, rA, rB);
+          var deltaC = CDcand - cCD;
+          var tr2 = document.createElement("tr");
+          if (Math.abs(nCand - nOtherExact) < 0.02) tr2.className = "exact";
+          var applyId = "apply-" + nCand;
+          tr2.innerHTML = "<td>" + nCand + "</td><td>" + fmt(CDcand,2) + " mm</td><td>" + (deltaC>=0?"+":"") + fmt(deltaC,2) + " mm</td>" +
+            "<td><button class='apply-btn' data-n='" + nCand + "' type='button'>Apply to " + cSolveSide + "</button></td>";
+          cTable.appendChild(tr2);
+        }
+      }
+    }
+
+    drawSchematic(P, N1, N2, targetCD);
+    saveState();
+  }
+
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest(".apply-btn");
+    if (!btn) return;
+    var n = btn.getAttribute("data-n");
+    if (cSolveSide === "B") $("n2").value = n; else $("n1").value = n;
+    recalc();
+  });
+
+  [ "n1","n2","pitchCustom","widthLabel","aCD","bLen","cCD","cLen","cKnownTeeth" ].forEach(function(id){
+    $(id).addEventListener("input", recalc);
+  });
+
+  loadState();
+  buildChips();
+  Array.prototype.forEach.call($("cSolveToggle").querySelectorAll("button"), function(b){
+    b.classList.toggle("active", b.getAttribute("data-side") === cSolveSide);
+  });
+  $("pitchCustomWrap").style.display = ($("pitch").value === "custom") ? "block" : "none";
+  recalc();
+})();
+</script>
+</body>
+</html>
